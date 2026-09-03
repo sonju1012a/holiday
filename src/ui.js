@@ -2,6 +2,7 @@
 // DOM UI — 스텝퍼 / 배너 / 교육 토스트 / 트레이 / 모달
 // ===================================================================
 import { RULES, SETUP_STEPS, FOOD_ROWS } from './data.js';
+import ITEMS from './shop-links.json';
 
 export class UI {
   constructor() {
@@ -13,10 +14,12 @@ export class UI {
     this.$tray = document.getElementById('tray');
     this.$trayHint = document.getElementById('tray-hint');
     this.$skipBtn = document.getElementById('btn-skip-row');
+    this.$answerBtn = document.getElementById('btn-show-answer');
     this.eduTimer = null;
 
     this.buildStepper();
     this.buildRulesModal();
+    this.buildIngredientsModal(FOOD_ROWS);
 
     document.getElementById('btn-rules').addEventListener('click', () => {
       document.getElementById('modal-rules').classList.remove('hidden');
@@ -24,11 +27,29 @@ export class UI {
     document.querySelector('#modal-rules .modal-close').addEventListener('click', () => {
       document.getElementById('modal-rules').classList.add('hidden');
     });
+
+    document.getElementById('btn-ingredients').addEventListener('click', () => {
+      document.getElementById('modal-ingredients').classList.remove('hidden');
+    });
+    document.querySelector('#modal-ingredients .modal-close').addEventListener('click', () => {
+      document.getElementById('modal-ingredients').classList.add('hidden');
+    });
   }
 
-  buildStepper(rows = FOOD_ROWS) {
+  /** 재료 목록 모달을 현재 모드의 열 구성으로 다시 채움 */
+  buildIngredientsModal(rows) {
+    const list = document.getElementById('ingredients-list');
+    list.innerHTML = rows
+      .map((r) => {
+        const names = [...new Set(r.items.map((id) => ITEMS[id]?.name).filter(Boolean))].join(' · ');
+        return `<div class="rule-item"><h4>${r.title}</h4><p>${names}</p></div>`;
+      })
+      .join('');
+  }
+
+  buildStepper(rows = FOOD_ROWS, setupSteps = SETUP_STEPS) {
     this.steps = [
-      ...SETUP_STEPS.map((s) => ({ key: `setup:${s.id}`, label: s.emoji + ' ' + s.name.split(' ')[0] })),
+      ...setupSteps.map((s) => ({ key: `setup:${s.id}`, label: s.emoji + ' ' + s.name.split(' ')[0] })),
       ...rows.map((r) => ({ key: `row:${r.row}`, label: `${r.row}열` })),
     ];
     this.$stepper.innerHTML = '';
@@ -66,7 +87,7 @@ export class UI {
 
   eduToast(title, body, ms = 6500) {
     this.$edu.querySelector('.edu-title').textContent = title;
-    this.$edu.querySelector('.edu-body').textContent = body;
+    this.$edu.querySelector('.edu-body').innerHTML = body;
     this.$edu.classList.remove('hidden');
     clearTimeout(this.eduTimer);
     this.eduTimer = setTimeout(() => this.$edu.classList.add('hidden'), ms);
@@ -74,6 +95,7 @@ export class UI {
 
   trayHint(text) { this.$trayHint.textContent = text; }
   setSkipVisible(visible) { this.$skipBtn.classList.toggle('hidden', !visible); }
+  setAnswerVisible(visible) { this.$answerBtn.classList.toggle('hidden', !visible); }
 
   /** 트레이에 아이템 카드 렌더 — onSelect(id) */
   renderTray(items, onSelect) {

@@ -39,6 +39,7 @@ export class Game {
 
     this.mode = MODES.trad;
     this.rows = this.mode.rows;
+    this.setupSteps = this.mode.setupSteps || SETUP_STEPS;
     this.placedIds = new Set();   // 배치 완료한 음식 id
     this.tabooCaught = 0;         // 금기 음식을 잘못 고른 횟수
 
@@ -72,34 +73,36 @@ export class Game {
   start(modeKey = 'trad') {
     this.mode = MODES[modeKey] || MODES.trad;
     this.rows = this.mode.rows;
+    this.setupSteps = this.mode.setupSteps || SETUP_STEPS;
     // 음식(진짜 제수) + 금기 함정 카드를 열 순서대로 트레이에 배열 — 내용은 shop-links.json에서 조회
     this.trayItems = this.rows.flatMap((r) => [
       ...r.items.map((id) => ({ ...ITEMS[id], id, row: r.row, z: r.z })),
       ...(r.taboos || []).map((id) => ({ ...ITEMS[id], id, row: r.row, z: r.z, taboo: true })),
     ]);
     this.totalFood = this.rows.reduce((sum, r) => sum + r.slots.length, 0);
-    this.maxScore = SETUP_STEPS.length * 50 + this.totalFood * 100;
-    this.ui.buildStepper(this.rows);
+    this.maxScore = this.setupSteps.length * 50 + this.totalFood * 100;
+    this.ui.buildStepper(this.rows, this.setupSteps);
+    this.ui.buildIngredientsModal(this.rows);
     this.phase = 'setup';
     this.setupIdx = 0;
     this._beginSetupStep();
   }
 
   _beginSetupStep() {
-    const step = SETUP_STEPS[this.setupIdx];
+    const step = this.setupSteps[this.setupIdx];
     this.ui.setStep(`setup:${step.id}`);
-    this.ui.setStageLabel(`준비 ${this.setupIdx + 1}/${SETUP_STEPS.length} · ${step.name}`);
+    this.ui.setStageLabel(`준비 ${this.setupIdx + 1}/${this.setupSteps.length} · ${step.name}`);
     this.ui.banner(step.guide);
     this.ui.trayHint('빛나는 자리를 눌러 놓아주세요');
     this.ui.renderTray([{ id: step.id, name: step.name, emoji: step.emoji, icon: iconFor(step.model), sub: '준비물' }], () => {});
     this.ui.markSelected(step.id);
 
     // 이동 평면 + 존 마커
-    if (step.id === 'jibang') {
+    if (step.id.startsWith('jibang')) {
       this.movePlane.set(new THREE.Vector3(0, 0, 1), 2.5); // z = -2.5 수직면
       this._makeZoneMarker(step, true);
       this._tweenCam([0, 2.3, 1.6], [0, 1.5, -2.6]);
-    } else if (step.id === 'chotdae') {
+    } else if (step.id === 'chotdae' || step.id === 'wipae') {
       this.movePlane.set(new THREE.Vector3(0, 1, 0), -TABLE_TOP_Y);
       this._makeZoneMarker(step, false);
       this._tweenCam([0, 4.0, 4.8], [0, 0.85, -0.8]);
@@ -133,6 +136,7 @@ export class Game {
       ? `${row.row}열 음식을 골라 빈 자리 아무 곳에나 놓으세요 (배치 자유!)`
       : `${row.row}열 음식을 골라 상 위의 빛나는 자리에 놓으세요 (${row.row}열부터 차례대로!)`);
     this.ui.setSkipVisible(true);
+    this.ui.setAnswerVisible(true);
     this._updateTrayLocks();
     this._makeSlotMarkers(row);
     const rowZ = TABLE_CENTER_Z + row.z;
@@ -196,11 +200,11 @@ export class Game {
 
   _trySetupPlace() {
     if (!this.ghost) return;
-    const step = SETUP_STEPS[this.setupIdx];
+    const step = this.setupSteps[this.setupIdx];
     const p = this._raycastPlane();
     if (!p) return;
     const target = new THREE.Vector3(...step.pos);
-    const dist = step.id === 'jibang'
+    const dist = step.id.startsWith('jibang')
       ? Math.hypot(p.x - target.x, p.y - target.y)
       : Math.hypot(p.x - target.x, p.z - target.z);
     if (dist > step.zone) {
@@ -223,7 +227,7 @@ export class Game {
     this.shop.recommend(step.shop);
 
     this.setupIdx += 1;
-    if (this.setupIdx < SETUP_STEPS.length) {
+    if (this.setupIdx < this.setupSteps.length) {
       setTimeout(() => this._beginSetupStep(), 600);
     } else {
       setTimeout(() => this._beginFoodPhase(), 800);
@@ -329,14 +333,36 @@ export class Game {
       setTimeout(() => this._beginRow(), 500);
     } else {
       this.ui.setSkipVisible(false);
+      this.ui.setAnswerVisible(false);
       setTimeout(() => this._complete(), 700);
     }
+  }
+
+  /** 지금 열의 정답을 토스트로 보여줌 (감점 없음) */
+  showAnswer() {
+    if (this.phase !== 'food') return;
+    const row = this.rows[this.rowIdx];
+    let body;
+    if (this.mode.free) {
+      const names = [...new Set(row.items.map((id) => ITEMS[id].name))].join(' · ');
+      body = `이번 열은 자유 배치예요. <b>${names}</b> 중 골라 빈 자리 아무 곳에나 놓으면 정답!`;
+    } else {
+      const lines = row.slots
+        .filter((s) => !this.filled.has(s.id))
+        .map((s) => {
+          const item = row.items.map((id) => ITEMS[id]).find((it) => it.slot === s.id);
+          return `${s.name} 자리 → <b>${item ? item.name : '?'}</b>`;
+        });
+      body = lines.join('<br/>');
+    }
+    this.ui.eduToast('💡 정답 보기', body, 6000);
   }
 
   // ================= 완성 =================
   _complete() {
     this.phase = 'done';
     this.ui.setSkipVisible(false);
+    this.ui.setAnswerVisible(false);
     this.ui.finishStepper();
     this.ui.setStageLabel('차례상 완성!');
     this.ui.clearTray();
@@ -396,7 +422,7 @@ export class Game {
     } else {
       ring.rotation.x = -Math.PI / 2;
       ring.position.set(step.pos[0], (step.pos[1] || 0) + 0.015, step.pos[2]);
-      if (step.id === 'chotdae') ring.position.y = TABLE_TOP_Y + 0.015;
+      if (step.id === 'chotdae' || step.id === 'wipae') ring.position.y = TABLE_TOP_Y + 0.015;
     }
     ring.userData.pulse = true;
     this.zoneMarker = ring;
@@ -468,7 +494,7 @@ export class Game {
     if (this.ghost) {
       const p = this._raycastPlane();
       if (p) {
-        if (this.phase === 'setup' && SETUP_STEPS[this.setupIdx]?.id === 'jibang') {
+        if (this.phase === 'setup' && this.setupSteps[this.setupIdx]?.id.startsWith('jibang')) {
           this.ghost.position.set(p.x, p.y, -2.52);
         } else {
           this.ghost.position.set(p.x, -this.movePlane.constant, p.z);

@@ -196,7 +196,7 @@ button, a, .tray-card { touch-action: manipulation; } /* 더블탭 확대 방지
   color: rgba(253, 246, 227, 0.75);
   text-shadow: 0 1px 3px rgba(0,0,0,.8);
 }
-#btn-skip-row {
+#btn-skip-row, #btn-show-answer {
   flex: 0 0 auto;
   pointer-events: auto;
   background: rgba(20, 12, 6, 0.72);
@@ -209,7 +209,7 @@ button, a, .tray-card { touch-action: manipulation; } /* 더블탭 확대 방지
   white-space: nowrap;
   transition: background .15s;
 }
-#btn-skip-row:hover { background: rgba(80, 50, 25, 0.85); }
+#btn-skip-row:hover, #btn-show-answer:hover { background: rgba(80, 50, 25, 0.85); }
 #tray {
   display: flex; gap: 10px;
   overflow-x: auto;
@@ -285,6 +285,17 @@ button, a, .tray-card { touch-action: manipulation; } /* 더블탭 확대 방지
 .mode-btn .m-emoji { grid-area: emoji; font-size: 30px; text-align: center; }
 .mode-btn b { grid-area: title; font-size: 15px; color: var(--ink); }
 .mode-btn small { grid-area: desc; font-size: 11.5px; color: #8a7050; margin-top: 2px; }
+
+.request-link {
+  display: block;
+  text-align: center;
+  margin-top: 12px;
+  font-size: 12.5px;
+  color: #8a7050;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.request-link:hover { color: var(--dancheong-red); }
 
 /* ---------- 모달 ---------- */
 .modal {
@@ -400,9 +411,29 @@ button, a, .tray-card { touch-action: manipulation; } /* 더블탭 확대 방지
   padding: 3px 12px; border-radius: 999px;
   margin-bottom: 8px;
 }
-#giftset-reco h3 { font-size: 17px; margin-bottom: 6px; }
-#giftset-reco p { font-size: 13px; color: #7a5240; margin-bottom: 12px; }
-.gift-btn { background: #3182f6; font-size: 14px; padding: 12px 22px; }
+.gift-options { display: flex; gap: 12px; flex-wrap: wrap; }
+.gift-card {
+  flex: 1 1 200px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 12px;
+  padding: 14px;
+  text-align: left;
+}
+.gift-tag {
+  display: inline-block;
+  font-size: 10.5px; font-weight: 700;
+  color: var(--dancheong-red);
+  border: 1px solid var(--dancheong-red);
+  border-radius: 999px;
+  padding: 2px 8px;
+  margin-bottom: 6px;
+}
+.gift-card h3 { font-size: 15px; margin-bottom: 4px; }
+.gift-card p { font-size: 12px; color: #7a5240; margin-bottom: 10px; line-height: 1.5; }
+.gift-price { font-size: 13px; margin-bottom: 10px; }
+.gift-price b { color: var(--dancheong-red); font-size: 15px; margin-right: 6px; }
+.gift-price s { color: #a8927e; }
+.gift-btn { display: block; width: 100%; background: #3182f6; font-size: 13.5px; padding: 11px 16px; text-align: center; }
 .gift-btn:hover { background: #1b64da; }
 .complete-actions { display: flex; gap: 10px; justify-content: center; }
 

@@ -75,17 +75,23 @@ export class Shop {
   fillGiftSet() {
     const box = document.getElementById('giftset-reco');
     if (this.engaged) { box.classList.add('hidden'); return; }
-    const g = SHOP_CATALOG.giftset;
-    document.getElementById('gift-name').textContent = g.shopName;
-    document.getElementById('gift-desc').textContent = g.shopDesc;
-    const $link = document.getElementById('gift-link');
+    this._fillGiftCard('easytable', SHOP_CATALOG.giftset_easytable);
+    this._fillGiftCard('hanwoo', SHOP_CATALOG.giftset_hanwoo);
+    box.classList.remove('hidden');
+  }
+
+  _fillGiftCard(key, g) {
+    document.getElementById(`gift-${key}-name`).textContent = g.shopName;
+    document.getElementById(`gift-${key}-desc`).textContent = g.shopDesc;
+    document.getElementById(`gift-${key}-sale`).textContent = g.salePrice;
+    document.getElementById(`gift-${key}-price`).textContent = g.price;
+    const $link = document.getElementById(`gift-${key}-link`);
     $link.href = g.link;
     $link.onclick = (e) => {
       e.preventDefault();
       this._markEngaged();
       openExternal($link.href);
     };
-    box.classList.remove('hidden');
   }
 
   _markEngaged() {

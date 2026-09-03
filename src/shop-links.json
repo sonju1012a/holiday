@@ -32,10 +32,19 @@
     "link": "https://toss.im/_m/HUIiNqWD"
   },
 
-  "giftset": {
-    "shopName": "국산 약과",
-    "shopDesc": "요즘 명절 선물로 가장 인기 있는 간식, 약과예요.",
-    "link": "https://toss.im/_m/H708VNI9"
+  "giftset_easytable": {
+    "shopName": "제사상차림 1호상 (3~4인용)",
+    "shopDesc": "24종 음식이 다 차려진 완성형 제사상 — 힘들게 만들 필요 없이 바로 올려요.",
+    "price": "229,000원",
+    "salePrice": "226,000원",
+    "link": "https://toss.im/_m/xdyUCV56"
+  },
+  "giftset_hanwoo": {
+    "shopName": "횡성한우 1++ 구이용 세트",
+    "shopDesc": "꽃등심·눈꽃로스·보섭로스 600g — 명절 선물로 손색없는 프리미엄 한우.",
+    "price": "67,800원",
+    "salePrice": "64,800원",
+    "link": "https://toss.im/_m/haF6k5Hy"
   },
 
   "me_m": {
@@ -1075,5 +1084,252 @@
     "sub": "금기!",
     "emoji": "🍑",
     "desc": "털 있는 복숭아는 귀신을 쫓는다고 여겨 제사상에 올리지 않아요. 조상님이 못 오세요!"
+  },
+
+  "mf_jan": {
+    "name": "청주",
+    "sub": "잔반",
+    "emoji": "🥃",
+    "model": "sulJan",
+    "slot": "mf1_1",
+    "desc": "부모님·조부모님·증조부모님께 함께 올리는 술잔.",
+    "shopName": "청주",
+    "shopDesc": "차례용으로 많이 쓰는 맑은 청주.",
+    "link": "https://link.toss.im/YOUR_SHARE_LINK"
+  },
+  "mf_bap": {
+    "name": "술밥",
+    "sub": "메",
+    "emoji": "🍚",
+    "model": "songpyeon",
+    "slot": "mf1_2",
+    "desc": "일직 손가에서 올리는 술밥(메).",
+    "shopName": "찹쌀 술밥",
+    "shopDesc": "차례상에 올리기 좋은 찹쌀 술밥.",
+    "link": "https://link.toss.im/YOUR_SHARE_LINK"
+  },
+  "mf_guk": {
+    "name": "소고기국",
+    "sub": "갱",
+    "emoji": "🍲",
+    "model": "guk",
+    "slot": "mf1_3",
+    "desc": "1열에 올리는 소고기국.",
+    "shopName": "소고기뭇국",
+    "shopDesc": "차례상에 올리기 좋은 맑은 소고기뭇국.",
+    "link": "https://link.toss.im/YOUR_SHARE_LINK"
+  },
+
+  "mf_muneotang": {
+    "name": "문어탕",
+    "sub": "조림",
+    "emoji": "🐙",
+    "model": "tang",
+    "slot": "mf2_1",
+    "desc": "일직 손가에서 '탕'이라 부르는 건 국물이 아니라 간장에 조린 요리예요.",
+    "shopName": "문어숙회",
+    "shopDesc": "부드럽게 삶은 문어.",
+    "link": "https://link.toss.im/YOUR_SHARE_LINK"
+  },
+  "mf_dak": {
+    "name": "닭조림",
+    "sub": "탕",
+    "emoji": "🍗",
+    "model": "tang",
+    "slot": "mf2_2",
+    "desc": "간장에 조린 닭조림. 우리 집에서 부르는 '탕' 중 하나예요.",
+    "shopName": "닭조림용 닭고기",
+    "shopDesc": "조림용으로 손질된 닭고기.",
+    "link": "https://link.toss.im/YOUR_SHARE_LINK"
+  },
+  "mf_sogogitang": {
+    "name": "소고기조림",
+    "sub": "탕",
+    "emoji": "🥩",
+    "model": "tang",
+    "slot": "mf2_3",
+    "desc": "간장에 조린 소고기조림.",
+    "shopName": "장조림용 소고기",
+    "shopDesc": "조림하기 좋은 장조림용 소고기.",
+    "link": "https://link.toss.im/YOUR_SHARE_LINK"
+  },
+
+  "mf_ojingeo": {
+    "name": "오징어",
+    "sub": "포",
+    "emoji": "🦑",
+    "model": "po",
+    "slot": "mf3_1",
+    "desc": "말린 오징어포.",
+    "shopName": "건오징어",
+    "shopDesc": "손질된 건오징어.",
+    "link": "https://link.toss.im/YOUR_SHARE_LINK"
+  },
+  "mf_dongtaepo": {
+    "name": "동태포",
+    "sub": "포",
+    "emoji": "🐟",
+    "model": "po",
+    "slot": "mf3_2",
+    "desc": "명태(동태)로 뜬 포.",
+    "shopName": "동태포",
+    "shopDesc": "손질된 동태포.",
+    "link": "https://link.toss.im/YOUR_SHARE_LINK"
+  },
+  "mf_suyuk": {
+    "name": "돼지고기수육",
+    "sub": "편육",
+    "emoji": "🥓",
+    "model": "jokbal",
+    "slot": "mf3_3",
+    "desc": "삶아서 편으로 썬 돼지고기 수육.",
+    "shopName": "수육용 돼지고기",
+    "shopDesc": "삶아서 편육으로 쓰기 좋은 돼지고기.",
+    "link": "https://link.toss.im/YOUR_SHARE_LINK"
+  },
+  "mf_jogi": {
+    "name": "조기",
+    "sub": "생선",
+    "emoji": "🐟",
+    "model": "eojeok",
+    "slot": "mf3_4",
+    "desc": "굴비로도 부르는 말린 조기.",
+    "shopName": "굴비",
+    "shopDesc": "손질된 참조기(굴비).",
+    "link": "https://link.toss.im/YOUR_SHARE_LINK"
+  },
+  "mf_gyeran": {
+    "name": "삶은 계란",
+    "sub": "계란",
+    "emoji": "🥚",
+    "model": "gyeran",
+    "slot": "mf3_5",
+    "desc": "삶아서 올리는 계란.",
+    "shopName": "구운란",
+    "shopDesc": "삶아서 바로 올리기 좋은 구운란.",
+    "link": "https://link.toss.im/YOUR_SHARE_LINK"
+  },
+
+  "mf_hamjeon": {
+    "name": "햄전",
+    "sub": "전",
+    "emoji": "🫓",
+    "model": "jeon",
+    "slot": "mf4_1",
+    "desc": "햄을 부친 햄전.",
+    "shopName": "전 부치기용 햄",
+    "shopDesc": "얇게 썬 전용 햄.",
+    "link": "https://link.toss.im/YOUR_SHARE_LINK"
+  },
+  "mf_ojingeotwigim": {
+    "name": "오징어튀김",
+    "sub": "튀김",
+    "emoji": "🦑",
+    "model": "jeon",
+    "slot": "mf4_2",
+    "desc": "튀긴 오징어.",
+    "shopName": "오징어튀김",
+    "shopDesc": "바삭하게 튀긴 오징어튀김.",
+    "link": "https://link.toss.im/YOUR_SHARE_LINK"
+  },
+  "mf_saewootwigim": {
+    "name": "새우튀김",
+    "sub": "튀김",
+    "emoji": "🍤",
+    "model": "jeon",
+    "slot": "mf4_4",
+    "desc": "튀긴 새우.",
+    "shopName": "새우튀김",
+    "shopDesc": "바삭하게 튀긴 새우튀김.",
+    "link": "https://link.toss.im/YOUR_SHARE_LINK"
+  },
+  "mf_dubujeon": {
+    "name": "두부전",
+    "sub": "전",
+    "emoji": "⬜",
+    "model": "jeon",
+    "slot": "mf4_5",
+    "desc": "두부로 부친 두부전.",
+    "shopName": "전 부치기용 두부",
+    "shopDesc": "부침용으로 썬 두부.",
+    "link": "https://link.toss.im/YOUR_SHARE_LINK"
+  },
+  "mf_buchujeon": {
+    "name": "부추전",
+    "sub": "전",
+    "emoji": "🟢",
+    "model": "jeon",
+    "slot": "mf4_7",
+    "desc": "부추를 부친 부추전.",
+    "shopName": "부침용 부추",
+    "shopDesc": "전 부치기 좋은 부추.",
+    "link": "https://link.toss.im/YOUR_SHARE_LINK"
+  },
+
+  "mf_mu": {
+    "name": "무나물",
+    "sub": "나물",
+    "emoji": "🥬",
+    "model": "namul",
+    "slot": "mf5_1",
+    "desc": "채 썰어 볶은 무나물.",
+    "shopName": "무나물",
+    "shopDesc": "손질된 무나물.",
+    "link": "https://link.toss.im/YOUR_SHARE_LINK"
+  },
+  "mf_kongnamul": {
+    "name": "콩나물",
+    "sub": "나물",
+    "emoji": "🥬",
+    "model": "namul",
+    "slot": "mf5_2",
+    "desc": "무친 콩나물.",
+    "shopName": "콩나물",
+    "shopDesc": "손질된 콩나물.",
+    "link": "https://link.toss.im/YOUR_SHARE_LINK"
+  },
+  "mf_sukju": {
+    "name": "숙주나물",
+    "sub": "나물",
+    "emoji": "🥬",
+    "model": "namul",
+    "slot": "mf5_3",
+    "desc": "무친 숙주나물.",
+    "shopName": "숙주나물",
+    "shopDesc": "손질된 숙주나물.",
+    "link": "https://link.toss.im/YOUR_SHARE_LINK"
+  },
+  "mf_sigeumchi": {
+    "name": "시금치나물",
+    "sub": "나물",
+    "emoji": "🥬",
+    "model": "namul",
+    "slot": "mf5_4",
+    "desc": "무친 시금치나물.",
+    "shopName": "시금치나물",
+    "shopDesc": "손질된 시금치.",
+    "link": "https://link.toss.im/YOUR_SHARE_LINK"
+  },
+  "mf_doraji": {
+    "name": "도라지나물",
+    "sub": "나물",
+    "emoji": "🥬",
+    "model": "namul",
+    "slot": "mf5_5",
+    "desc": "무친 도라지나물.",
+    "shopName": "도라지나물",
+    "shopDesc": "손질된 도라지나물.",
+    "link": "https://link.toss.im/YOUR_SHARE_LINK"
+  },
+  "mf_gosari": {
+    "name": "고사리나물",
+    "sub": "나물",
+    "emoji": "🥬",
+    "model": "namul",
+    "slot": "mf5_6",
+    "desc": "무친 고사리나물.",
+    "shopName": "고사리나물",
+    "shopDesc": "손질된 고사리나물.",
+    "link": "https://link.toss.im/YOUR_SHARE_LINK"
   }
 }

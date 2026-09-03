@@ -57,6 +57,7 @@
     <div class="hud-right">
       <div id="score-box">점수 <b id="score">0</b></div>
       <button id="btn-rules" class="hud-btn" title="차례상 규칙 도감">📖 규칙</button>
+      <button id="btn-ingredients" class="hud-btn" title="차례상 재료 보기">🧾 재료</button>
       <button id="btn-sound" class="hud-btn" title="소리 켜기/끄기">🔊</button>
     </div>
   </header>
@@ -89,6 +90,7 @@
   <footer id="tray-wrap">
     <div class="tray-top">
       <div id="tray-hint"></div>
+      <button id="btn-show-answer" class="hidden">정답 보기 💡</button>
       <button id="btn-skip-row" class="hidden">다음 열로 건너뛰기 ⏭</button>
     </div>
     <div id="tray"></div>
@@ -126,7 +128,16 @@
           <b>간편 제사상</b>
           <small>배달·냉동식품 자유 배치 · 금기 음식만 피하기</small>
         </button>
+        <button class="mode-btn" data-mode="myfamily">
+          <span class="m-emoji">📿</span>
+          <b>일직 손가 35세손 차례상</b>
+          <small>우리 집 차례상 그대로 · 처사(處士) · 4대 8위</small>
+        </button>
       </div>
+      <a id="request-charye" class="request-link"
+         href="mailto:sonju1012jja@gmail.com?subject=%EC%9A%B0%EB%A6%AC%EC%A7%91%20%EC%B0%A8%EB%A1%80%EC%83%81%20%EB%93%B1%EB%A1%9D%20%EC%9A%94%EC%B2%AD&body=%EC%95%88%EB%85%95%ED%95%98%EC%84%B8%EC%9A%94%21%20%EC%A0%80%ED%9D%AC%20%EC%A7%91%20%EC%B0%A8%EB%A1%80%EC%83%81%EC%9D%84%20%EA%B2%8C%EC%9E%84%EC%97%90%20%EB%93%B1%EB%A1%9D%ED%95%98%EA%B3%A0%20%EC%8B%B6%EC%96%B4%EC%9A%94%21%0A%0A%5B%EB%AC%B8%EC%A4%91/%EC%A7%80%EC%97%AD%5D%3A%20%0A%5B%EC%A7%80%EB%B0%A9%C2%B7%EC%9C%84%ED%8C%A8%20%EB%AC%B8%EA%B5%AC%5D%3A%20%28%ED%95%9C%EC%9E%90%20%EC%9B%90%EB%AC%B8%20%EB%98%90%EB%8A%94%20%EC%82%AC%EC%A7%84%20%EC%A4%91%20%ED%95%98%EB%82%98%EB%A1%9C%20%EC%95%8C%EB%A0%A4%EC%A3%BC%EC%84%B8%EC%9A%94%20%E2%80%94%20%EC%B2%98%EC%82%AC/%ED%95%99%EC%83%9D%20%EC%97%AC%EB%B6%80%2C%20%EB%AA%87%20%EB%8C%80%EA%B9%8C%EC%A7%80%20%EB%AA%A8%EC%8B%9C%EB%8A%94%EC%A7%80%EB%8F%84%20%ED%95%A8%EA%BB%98%29%0A%0A%5B1%EC%97%B4%5D%3A%20%0A%5B2%EC%97%B4%5D%3A%20%0A%5B3%EC%97%B4%5D%3A%20%0A%5B4%EC%97%B4%5D%3A%20%0A%5B5%EC%97%B4%5D%3A%20%0A%28%EC%97%B4%EC%9D%B4%20%EB%8D%94%20%EC%9E%88%EC%9C%BC%EB%A9%B4%20%EC%9D%B4%EC%96%B4%EC%84%9C%20%EC%A0%81%EC%96%B4%EC%A3%BC%EC%84%B8%EC%9A%94%29%0A%0A%E2%80%BB%20%EC%83%81%20%EC%A0%84%EC%B2%B4%EA%B0%80%20%EC%9E%98%20%EB%B3%B4%EC%9D%B4%EB%8A%94%20%EC%82%AC%EC%A7%84%EC%9D%84%20%EA%BC%AD%20%EC%B2%A8%EB%B6%80%ED%95%B4%20%EC%A3%BC%EC%84%B8%EC%9A%94%21">
+        📮 우리집 차례상도 등록 요청하기
+      </a>
       <p class="fine-print">※ 차례상 예법은 지역과 가문에 따라 다를 수 있습니다.</p>
     </div>
   </div>
@@ -136,6 +147,15 @@
     <div class="modal-card wide">
       <h2>📖 차례상 규칙 도감</h2>
       <div id="rules-list"></div>
+      <button class="btn-primary modal-close">닫기</button>
+    </div>
+  </div>
+
+  <!-- 재료 목록 모달 -->
+  <div id="modal-ingredients" class="modal hidden">
+    <div class="modal-card wide">
+      <h2>🧾 차례상 재료</h2>
+      <div id="ingredients-list"></div>
       <button class="btn-primary modal-close">닫기</button>
     </div>
   </div>
@@ -152,9 +172,28 @@
       <!-- 선물세트 추천 (쇼핑 미참여 시 노출) -->
       <div id="giftset-reco" class="hidden">
         <div class="gift-badge">🎁 마지막 추천</div>
-        <h3 id="gift-name"></h3>
-        <p id="gift-desc"></p>
-        <a id="gift-link" class="btn-primary gift-btn" target="_blank" rel="noopener">토스쇼핑에서 선물세트 보기 →</a>
+        <div class="gift-options">
+          <div class="gift-card">
+            <div class="gift-tag">쉬운 차례상</div>
+            <h3 id="gift-easytable-name"></h3>
+            <p id="gift-easytable-desc"></p>
+            <div class="gift-price">
+              <b id="gift-easytable-sale"></b>
+              <s id="gift-easytable-price"></s>
+            </div>
+            <a id="gift-easytable-link" class="btn-primary gift-btn" target="_blank" rel="noopener">토스쇼핑에서 보기 →</a>
+          </div>
+          <div class="gift-card">
+            <div class="gift-tag">명절 선물세트</div>
+            <h3 id="gift-hanwoo-name"></h3>
+            <p id="gift-hanwoo-desc"></p>
+            <div class="gift-price">
+              <b id="gift-hanwoo-sale"></b>
+              <s id="gift-hanwoo-price"></s>
+            </div>
+            <a id="gift-hanwoo-link" class="btn-primary gift-btn" target="_blank" rel="noopener">토스쇼핑에서 보기 →</a>
+          </div>
+        </div>
       </div>
 
       <div class="complete-actions">

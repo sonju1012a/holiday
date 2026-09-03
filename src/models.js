@@ -184,33 +184,59 @@ export function buildSang() {
   return g;
 }
 
-function jibangTexture() {
+// columns: 세로줄 하나당 지방 한 줄(考 또는 妣). 考/妣가 짝을 이루도록 2개씩 나란히 넣으면 됩니다.
+function jibangTexture(columns = ['顯考學生府君神位']) {
+  const colW = 68, rowH = 30, topPad = 34, bottomPad = 24;
+  const maxLen = Math.max(...columns.map((s) => [...s].length));
   const c = document.createElement('canvas');
-  c.width = 96; c.height = 320;
+  c.width = colW * columns.length;
+  c.height = topPad + maxLen * rowH + bottomPad;
   const ctx = c.getContext('2d');
   ctx.fillStyle = '#fffdf4';
-  ctx.fillRect(0, 0, 96, 320);
+  ctx.fillRect(0, 0, c.width, c.height);
   ctx.fillStyle = '#1c1710';
-  ctx.font = 'bold 30px "Gowun Batang", serif';
+  ctx.font = `bold ${columns.length > 2 ? 18 : 22}px "Gowun Batang", serif`;
   ctx.textAlign = 'center';
-  const chars = '顯考學生府君神位';
-  [...chars].forEach((ch, i) => ctx.fillText(ch, 48, 46 + i * 35));
+  columns.forEach((col, ci) => {
+    const cx = colW * ci + colW / 2;
+    [...col].forEach((ch, i) => ctx.fillText(ch, cx, topPad + i * rowH));
+  });
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   return tex;
 }
 
-export function buildJibang() {
+export function buildJibang(columns, scale = 1, colWidth = 0.34) {
+  const cols = columns && columns.length ? columns : ['顯考學生府君神位'];
   const g = new THREE.Group();
+  const totalW = colWidth * cols.length;
   // 지방틀 (받침 + 틀)
-  const frame = mesh(new THREE.BoxGeometry(0.34, 0.98, 0.035), MAT.woodDark, 0, 0, 0);
+  const frame = mesh(new THREE.BoxGeometry(totalW, 0.98, 0.035), MAT.woodDark, 0, 0, 0);
   const paper = mesh(
-    new THREE.BoxGeometry(0.26, 0.88, 0.04),
-    new THREE.MeshStandardMaterial({ map: jibangTexture(), roughness: 0.92 }),
+    new THREE.BoxGeometry(totalW - 0.08, 0.88, 0.04),
+    new THREE.MeshStandardMaterial({ map: jibangTexture(cols), roughness: 0.92 }),
     0, 0, 0.003
   );
   g.add(frame, paper);
+  if (scale !== 1) g.scale.setScalar(scale);
   return g;
+}
+
+// 일직 손가 35세손 — 부모·조부모·증조부모·고조부모 4대 8위를
+// 실제 사진처럼 부부(考/妣)가 한 장에 나란히 적힌 지방 4장으로 모십니다.
+export const MYFAMILY_JIBANG_PAIRS = [
+  ['顯考處士府君神位', '顯妣孺人達城徐氏神位'],
+  ['顯祖考處士府君神位', '顯祖妣孺人海平尹氏神位'],
+  ['顯曾祖考處士府君神位', '顯曾祖妣孺人眞城李氏神位'],
+  ['顯高祖考處士府君神位', '顯高祖妣孺人坡平尹氏神位'],
+];
+export function buildMyFamilyJibang(idx) {
+  return buildJibang(MYFAMILY_JIBANG_PAIRS[idx], 0.5, 0.2);
+}
+
+// 단일 제사(기제사)용 위패 — 지방과 같은 방식으로 병풍에 붙입니다.
+export function buildWipae() {
+  return buildJibang(['顯考處士府君神位'], 0.55, 0.3);
 }
 
 export function buildChotdae() {
@@ -511,6 +537,14 @@ function buildBam() {
     b.add(body, base);
     return b;
   }, 3, 0.048);
+}
+function buildGyeran() {
+  const p = jegiPlate(0.2, 0.13);
+  return pileOnPlate(p, () => {
+    const e = mesh(new THREE.SphereGeometry(0.04, 12, 10), std(0xf3ead2, { roughness: 0.4 }));
+    e.scale.set(0.85, 1, 0.85);
+    return e;
+  }, 3, 0.046);
 }
 function buildBae() {
   const p = jegiPlate(0.24, 0.14);
@@ -851,6 +885,7 @@ export const BUILDERS = {
   gotgam: buildGotgam,
   sagwa: buildSagwa,
   yakgwa: buildYakgwa,
+  gyeran: buildGyeran,
   // 간편 제사상(현대)
   instantBap: buildInstantBap,
   cola: canDrink(0xb02318),
@@ -873,6 +908,11 @@ export const BUILDERS = {
   cake: buildCake,
   macaron: buildMacaron,
 };
+
+MYFAMILY_JIBANG_PAIRS.forEach((_, i) => {
+  BUILDERS[`jibang_mf_${i}`] = () => buildMyFamilyJibang(i);
+});
+BUILDERS.wipae = buildWipae;
 
 export function buildModel(key) {
   const fn = BUILDERS[key];
