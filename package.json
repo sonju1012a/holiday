@@ -1,0 +1,19 @@
+{
+  "name": "charye-game",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "교육용 3D 차례상 차리기 게임",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@apps-in-toss/web-framework": "^3.2.0",
+    "three": "^0.170.0"
+  },
+  "devDependencies": {
+    "vite": "^6.0.0"
+  }
+}

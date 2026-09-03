@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#1a120c" />
+  <title>차례상 차리기 — 3D 교육 게임</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/style.css" />
+</head>
+<body>
+  <div id="app"></div>
+
+  <!-- 상단 HUD -->
+  <header id="hud">
+    <div class="hud-left">
+      <h1>차례상 차리기</h1>
+      <div id="stage-label">준비 중…</div>
+    </div>
+    <div class="hud-right">
+      <div id="score-box">점수 <b id="score">0</b></div>
+      <button id="btn-rules" class="hud-btn" title="차례상 규칙 도감">📖 규칙</button>
+      <button id="btn-sound" class="hud-btn" title="소리 켜기/끄기">🔊</button>
+    </div>
+  </header>
+
+  <!-- 진행 스텝퍼 -->
+  <nav id="stepper"></nav>
+
+  <!-- 중앙 안내 배너 -->
+  <div id="guide-banner" class="hidden"></div>
+
+  <!-- 교육 토스트 (배치 후 설명) -->
+  <aside id="edu-toast" class="hidden">
+    <div class="edu-title"></div>
+    <div class="edu-body"></div>
+  </aside>
+
+  <!-- 토스쇼핑 추천 토스트 -->
+  <aside id="shop-toast" class="hidden">
+    <button class="shop-close" aria-label="닫기">✕</button>
+    <div class="shop-badge">🛍 토스쇼핑 추천</div>
+    <div class="shop-name"></div>
+    <div class="shop-desc"></div>
+    <div class="shop-actions">
+      <a class="shop-link" target="_blank" rel="noopener">토스쇼핑에서 보기 →</a>
+      <button class="shop-skip">건너뛰기</button>
+    </div>
+  </aside>
+
+  <!-- 하단 트레이 -->
+  <footer id="tray-wrap">
+    <div id="tray-hint"></div>
+    <div id="tray"></div>
+  </footer>
+
+  <!-- 인트로 모달 -->
+  <div id="modal-intro" class="modal">
+    <div class="modal-card">
+      <div class="modal-deco">祭</div>
+      <h2>차례상 차리기</h2>
+      <p class="modal-sub">3D로 배우는 우리 명절 차례상</p>
+      <p>
+        병풍을 치고, 상을 펴고, 지방을 모시는 <b>준비 6단계</b>부터<br/>
+        신위에서 가까운 <b>1열 → 5열</b> 순서로 음식을 올리는<br/>
+        <b>진설 5단계</b>까지 — 정석 순서 그대로 체험해 보세요.
+      </p>
+      <ul class="intro-rules">
+        <li>🀄 반서갱동 · 어동육서 · 좌포우혜 · 조율이시 · 홍동백서</li>
+        <li>👆 아이템을 고른 뒤, 빛나는 자리를 눌러 놓아요</li>
+        <li>🔄 화면을 드래그하면 상을 둘러볼 수 있어요</li>
+      </ul>
+      <div class="mode-grid">
+        <button class="mode-btn" data-mode="trad">
+          <span class="m-emoji">🏮</span>
+          <b>전통 차례상</b>
+          <small>5열 정석 진설 · 반서갱동부터 홍동백서까지</small>
+        </button>
+        <button class="mode-btn" data-mode="ganso">
+          <span class="m-emoji">📜</span>
+          <b>성균관 표준안</b>
+          <small>음식 9가지 간소상 · 전 부치지 않아도 OK</small>
+        </button>
+        <button class="mode-btn" data-mode="easy">
+          <span class="m-emoji">🍕</span>
+          <b>간편 제사상</b>
+          <small>배달·냉동식품 자유 배치 · 금기 음식만 피하기</small>
+        </button>
+      </div>
+      <p class="fine-print">※ 차례상 예법은 지역과 가문에 따라 다를 수 있습니다.</p>
+    </div>
+  </div>
+
+  <!-- 규칙 도감 모달 -->
+  <div id="modal-rules" class="modal hidden">
+    <div class="modal-card wide">
+      <h2>📖 차례상 규칙 도감</h2>
+      <div id="rules-list"></div>
+      <button class="btn-primary modal-close">닫기</button>
+    </div>
+  </div>
+
+  <!-- 완성 모달 -->
+  <div id="modal-complete" class="modal hidden">
+    <div class="modal-card wide">
+      <div class="modal-deco">禮</div>
+      <h2>차례상 완성! 🎉</h2>
+      <div id="final-stars"></div>
+      <p id="final-score"></p>
+      <div id="final-summary"></div>
+
+      <!-- 선물세트 추천 (쇼핑 미참여 시 노출) -->
+      <div id="giftset-reco" class="hidden">
+        <div class="gift-badge">🎁 마지막 추천</div>
+        <h3 id="gift-name"></h3>
+        <p id="gift-desc"></p>
+        <a id="gift-link" class="btn-primary gift-btn" target="_blank" rel="noopener">토스쇼핑에서 선물세트 보기 →</a>
+      </div>
+
+      <div class="complete-actions">
+        <button id="btn-replay" class="btn-secondary">다시 차리기</button>
+        <a id="btn-online-charye" class="btn-secondary" href="https://YOUR_ONLINE_CHARYE_URL" target="_blank" rel="noopener">👨‍👩‍👧 가족과 온라인 차례지내기</a>
+      </div>
+      <p class="fine-print">※ 성균관 의례정립위원회는 간소한 차례상도 예에 어긋나지 않는다고 안내합니다.<br/>지역·가문마다 진설법이 다를 수 있어요.</p>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
