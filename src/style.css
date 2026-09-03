@@ -475,16 +475,18 @@ button, a, .tray-card { touch-action: manipulation; } /* 더블탭 확대 방지
   }
   #guide-banner .rule-tag { font-size: 10.5px; padding: 2px 8px; }
 
-  /* 토스트 2종은 트레이 위에 세로로 쌓기 */
+  /* 모바일에서는 트레이를 가리지 않도록 오른쪽 위에 작은 카드로 띄움 */
   #shop-toast {
-    left: 10px; right: 10px; width: auto;
-    bottom: calc(148px + env(safe-area-inset-bottom));
-    padding: 12px 14px; border-radius: 14px;
+    left: auto; right: 8px; width: min(168px, 44vw);
+    top: calc(60px + env(safe-area-inset-top)); bottom: auto;
+    padding: 10px 11px; border-radius: 12px;
   }
   #shop-toast .shop-desc { display: none; }
-  #shop-toast .shop-badge { margin-bottom: 5px; }
-  #shop-toast .shop-name { font-size: 13.5px; margin-bottom: 8px; }
-  #shop-toast .shop-link { font-size: 12.5px; padding: 9px 10px; }
+  #shop-toast .shop-badge { font-size: 9.5px; padding: 2px 8px; margin-bottom: 4px; }
+  #shop-toast .shop-name { font-size: 12px; margin-bottom: 7px; }
+  #shop-toast .shop-actions { flex-direction: column; align-items: stretch; gap: 5px; }
+  #shop-toast .shop-link { font-size: 11.5px; padding: 8px 8px; }
+  #shop-toast .shop-skip { padding: 2px 4px; font-size: 10.5px; align-self: center; }
   #edu-toast {
     left: 10px; right: 10px; width: auto;
     bottom: calc(268px + env(safe-area-inset-bottom));
