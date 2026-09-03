@@ -147,7 +147,12 @@ export const SETUP_STEPS = [
 
 // -------------------------------------------------------------------
 // 진설 5열 — 상(테이블) 로컬 좌표 (x: 서-, 동+ / z: 신위쪽 -, 앞쪽 +)
-// 각 slot: 정확히 그 자리에 놓아야 할 item id
+//
+// slots: 실제로 채워야 하는 상 위의 자리 (자리 수 고정, name은 오답 안내용 라벨)
+// items / taboos: shop-links.json에 정의된 음식 id 목록 — slots 수보다 많이 제공.
+//   정석 모드(free:false)에서는 각 item이 shop-links.json에서 지정한 slot(자리 id)에만
+//   들어가며, 같은 slot을 가리키는 대체 음식(계절/지역 변형) 중 하나만 고르면 정답.
+//   음식 이름·설명·아이콘·쇼핑 정보는 모두 shop-links.json에서 관리합니다.
 // -------------------------------------------------------------------
 export const FOOD_ROWS = [
   {
@@ -156,22 +161,16 @@ export const FOOD_ROWS = [
     guide: '신위(지방)에서 가장 가까운 <b>1열</b>부터 놓아요. 시접은 <b>가운데</b>, 남자 조상 상은 <b>서쪽(왼쪽)</b>, 여자 조상 상은 <b>동쪽(오른쪽)</b>!',
     rules: ['order', 'namjwa', 'banseo'],
     z: -0.95,
-    items: [
-      { id: 'me_m',    name: '송편(남)',  sub: '남자 조상 메', emoji: '🥟', model: 'songpyeon', x: -2.1,
-        desc: '남자 조상께 올리는 메(밥) 자리 — 추석엔 송편, 설엔 떡국을 올려요. 남좌여우에 따라 서쪽!' },
-      { id: 'guk_m',   name: '국(남)',    sub: '갱',          emoji: '🍲', model: 'guk',       x: -1.4,
-        desc: '남자 조상의 국(갱). 반서갱동 — 메(밥)의 동쪽 옆에 놓습니다.' },
-      { id: 'jan_m',   name: '술잔(남)',  sub: '잔반',        emoji: '🥃', model: 'sulJan',    x: -0.7,
-        desc: '남자 조상께 올리는 술잔(잔반)입니다.' },
-      { id: 'sijeop',  name: '시접',      sub: '수저 그릇',   emoji: '🥢', model: 'sijeop',    x: 0,
-        desc: '수저를 담는 시접은 1열 한가운데에 놓습니다.' },
-      { id: 'jan_f',   name: '술잔(여)',  sub: '잔반',        emoji: '🥃', model: 'sulJan',    x: 0.7,
-        desc: '여자 조상께 올리는 술잔. 남좌여우 — 여자 조상 것은 동쪽!' },
-      { id: 'me_f',    name: '송편(여)',  sub: '여자 조상 메', emoji: '🥟', model: 'songpyeon', x: 1.4,
-        desc: '여자 조상께 올리는 메(송편). 동쪽에 여자 조상의 상을 차립니다.' },
-      { id: 'guk_f',   name: '국(여)',    sub: '갱',          emoji: '🍲', model: 'guk',       x: 2.1,
-        desc: '여자 조상의 국. 이 세트에서도 국은 메의 동쪽입니다.' },
+    slots: [
+      { id: 'me_m',   x: -2.1, name: '메(남)' },
+      { id: 'guk_m',  x: -1.4, name: '국(남)' },
+      { id: 'jan_m',  x: -0.7, name: '술잔(남)' },
+      { id: 'sijeop', x: 0,    name: '시접' },
+      { id: 'jan_f',  x: 0.7,  name: '술잔(여)' },
+      { id: 'me_f',   x: 1.4,  name: '메(여)' },
+      { id: 'guk_f',  x: 2.1,  name: '국(여)' },
     ],
+    items: ['me_m', 'tteokguk_m', 'guk_m', 'jan_m', 'makgeolli_m', 'sijeop', 'jan_f', 'makgeolli_f', 'me_f', 'tteokguk_f', 'guk_f'],
   },
   {
     row: 2,
@@ -179,18 +178,14 @@ export const FOOD_ROWS = [
     guide: '<b>2열</b>은 구이(적)와 전! <b>어동육서</b> — 생선은 동쪽(오른쪽), 고기는 서쪽(왼쪽)이에요.',
     rules: ['eodong', 'dudong'],
     z: -0.42,
-    items: [
-      { id: 'yukjeok',  name: '육적',   sub: '고기 구이',  emoji: '🥩', model: 'yukjeok',  x: -1.9,
-        desc: '고기 구이(육적)는 어동육서에 따라 서쪽 끝에 놓습니다.' },
-      { id: 'yukjeon',  name: '육전',   sub: '고기 전',    emoji: '🫓', model: 'jeon',     x: -0.95,
-        desc: '고기로 부친 전. 고기 종류이니 서쪽에 놓아요.' },
-      { id: 'sojeok',   name: '소적',   sub: '두부 적',    emoji: '⬜', model: 'sojeok',   x: 0,
-        desc: '두부·채소 적(소적)은 고기와 생선 사이, 가운데에 놓습니다.' },
-      { id: 'eojeon',   name: '어전',   sub: '생선 전',    emoji: '🐠', model: 'eojeon',   x: 0.95,
-        desc: '생선살로 부친 전. 생선 종류이니 동쪽에 놓아요.' },
-      { id: 'eojeok',   name: '어적',   sub: '생선 구이',  emoji: '🐟', model: 'eojeok',   x: 1.9,
-        desc: '생선 구이(어적)는 동쪽 끝! 두동미서 — 머리는 동쪽을 향하게 합니다.' },
+    slots: [
+      { id: 'yukjeok', x: -1.9,  name: '육적(고기 구이)' },
+      { id: 'yukjeon', x: -0.95, name: '육전(고기 전)' },
+      { id: 'sojeok',  x: 0,     name: '소적(두부 적)' },
+      { id: 'eojeon',  x: 0.95,  name: '어전(생선 전)' },
+      { id: 'eojeok',  x: 1.9,   name: '어적(생선 구이)' },
     ],
+    items: ['yukjeok', 'tteokgalbi', 'yukjeon', 'donggeurangttaeng', 'sojeok', 'pyogojeok', 'eojeon', 'dongtaejeon', 'eojeok'],
   },
   {
     row: 3,
@@ -198,14 +193,12 @@ export const FOOD_ROWS = [
     guide: '<b>3열</b>은 탕! <b>육탕·소탕·어탕 3탕</b>을 홀수로 맞춰요. 여기도 어동육서 — 육탕은 서쪽, 어탕은 동쪽.',
     rules: ['hongsu', 'eodong'],
     z: 0.11,
-    items: [
-      { id: 'yuktang', name: '육탕', sub: '고기 탕',  emoji: '🍖', model: 'tang', x: -1.3,
-        desc: '고기로 끓인 육탕은 서쪽에 놓습니다.' },
-      { id: 'sotang',  name: '소탕', sub: '두부 탕',  emoji: '🥣', model: 'tang', x: 0,
-        desc: '두부·채소로 끓인 소탕은 가운데에 놓습니다.' },
-      { id: 'eotang',  name: '어탕', sub: '생선 탕',  emoji: '🐡', model: 'tang', x: 1.3,
-        desc: '생선으로 끓인 어탕은 동쪽에 놓습니다. 탕은 3탕·5탕처럼 홀수로!' },
+    slots: [
+      { id: 'yuktang', x: -1.3, name: '육탕' },
+      { id: 'sotang',  x: 0,    name: '소탕' },
+      { id: 'eotang',  x: 1.3,  name: '어탕' },
     ],
+    items: ['yuktang', 'sagoltang', 'sotang', 'dubutang', 'eotang', 'dongtaetang'],
   },
   {
     row: 4,
@@ -213,16 +206,14 @@ export const FOOD_ROWS = [
     guide: '<b>4열</b>은 <b>좌포우혜</b>! 포는 왼쪽(서쪽) 끝, 식혜는 오른쪽(동쪽) 끝. 가운데엔 나물과 김치를 올려요.',
     rules: ['jwapo'],
     z: 0.64,
-    items: [
-      { id: 'po',      name: '북어포',    sub: '포',         emoji: '🐟', model: 'po',     x: -1.9,
-        desc: '포(북어포·명태포)는 좌포우혜에 따라 서쪽 끝에 놓습니다.' },
-      { id: 'namul',   name: '삼색나물',  sub: '나물',       emoji: '🥬', model: 'namul',  x: -0.65,
-        desc: '고사리·도라지·시금치 삼색나물은 4열 가운데 쪽에 놓아요.' },
-      { id: 'kimchi',  name: '나박김치',  sub: '김치',       emoji: '🥗', model: 'kimchi', x: 0.65,
-        desc: '차례상에는 고춧가루를 쓰지 않은 하얀 나박김치를 올립니다.' },
-      { id: 'sikhye',  name: '식혜',      sub: '단술',       emoji: '🍚', model: 'sikhye', x: 1.9,
-        desc: '식혜(감주)는 좌포우혜에 따라 동쪽 끝! 밥알만 건져 담기도 해요.' },
+    slots: [
+      { id: 'po',     x: -1.9,  name: '포' },
+      { id: 'namul',  x: -0.65, name: '나물' },
+      { id: 'kimchi', x: 0.65,  name: '김치' },
+      { id: 'sikhye', x: 1.9,   name: '식혜' },
     ],
+    items: ['po', 'daegupo', 'namul', 'chwinamul', 'kimchi', 'baekkimchi', 'sikhye', 'sujeonggwa'],
+    taboos: ['t_redkimchi'],
   },
   {
     row: 5,
@@ -230,89 +221,71 @@ export const FOOD_ROWS = [
     guide: '마지막 <b>5열</b>은 과일! <b>조율이시</b> — 왼쪽부터 대추·밤·배·감 순서, <b>홍동백서</b> — 붉은 과일은 동쪽!',
     rules: ['joyul', 'hongdong'],
     z: 1.15,
-    items: [
-      { id: 'daechu',  name: '대추',  sub: '棗',      emoji: '🫘', model: 'daechu',  x: -2.15,
-        desc: '조율이시의 첫째, 대추! 씨가 하나라 임금을 상징한다고 전해져요. 서쪽 맨 끝.' },
-      { id: 'bam',     name: '밤',    sub: '栗',      emoji: '🌰', model: 'bam',     x: -1.29,
-        desc: '조율이시의 둘째, 밤. 한 송이에 세 톨이라 삼정승을 뜻한다고 해요.' },
-      { id: 'bae',     name: '배',    sub: '梨',      emoji: '🍐', model: 'bae',     x: -0.43,
-        desc: '조율이시의 셋째, 배. 홍동백서 — 흰 과일이라 서쪽에 놓습니다.' },
-      { id: 'gotgam',  name: '곶감',  sub: '枾',      emoji: '🟠', model: 'gotgam',  x: 0.43,
-        desc: '조율이시의 넷째, 감(곶감)입니다.' },
-      { id: 'sagwa',   name: '사과',  sub: '홍(紅)',  emoji: '🍎', model: 'sagwa',   x: 1.29,
-        desc: '붉은 사과는 홍동백서에 따라 동쪽에 놓습니다.' },
-      { id: 'yakgwa',  name: '약과',  sub: '한과',    emoji: '🍪', model: 'yakgwa',  x: 2.15,
-        desc: '약과·유과 같은 한과는 과일 줄 동쪽 끝에 함께 올립니다.' },
+    slots: [
+      { id: 'daechu', x: -2.15, name: '대추' },
+      { id: 'bam',    x: -1.29, name: '밤' },
+      { id: 'bae',    x: -0.43, name: '배' },
+      { id: 'gotgam', x: 0.43,  name: '곶감' },
+      { id: 'sagwa',  x: 1.29,  name: '사과' },
+      { id: 'yakgwa', x: 2.15,  name: '약과·한과' },
     ],
+    items: ['daechu', 'bam', 'bae', 'cheongpodo', 'gotgam', 'sagwa', 'hongsi', 'yakgwa', 'yugwa'],
+    taboos: ['t_peach'],
   },
 ];
 
 // -------------------------------------------------------------------
-// 성균관 간소화 표준안 모드 — 음식 9가지, 순서 자유(free), 전·튀김 제외
+// 성균관 간소화 표준안 모드 — 자유 배치(free), 전·튀김 제외
+// 각 열의 items는 slots 수보다 많이 제공 — 마음에 드는 조합을 골라 채우면 됩니다.
 // -------------------------------------------------------------------
 export const GANSO_ROWS = [
   {
     row: 1,
-    title: '1열 — 수저·잔·송편',
+    title: '1열 — 수저·잔·메',
     guide: '<b>성균관 표준안</b>으로 차려요. 음식은 <b>최대 9가지</b>면 충분! 순서·방향 부담 없이 <b>빈 자리 아무 곳에나</b> 편하게 놓으세요.',
     rules: ['ganso'],
-    z: -0.85, shopKey: 'row1',
-    items: [
-      { id: 'g_sijeop', name: '시접', sub: '수저 그릇', emoji: '🥢', model: 'sijeop', x: -1.5,
-        desc: '표준안에서도 수저와 잔은 기본으로 올립니다.' },
-      { id: 'g_jan', name: '술잔', sub: '잔반', emoji: '🥃', model: 'sulJan', x: 0,
-        desc: '차례에는 술을 한 번만 올려요(단헌).' },
-      { id: 'g_songpyeon', name: '송편', sub: '추석 메', emoji: '🥟', model: 'songpyeon', x: 1.5,
-        desc: '추석 차례의 대표 음식 송편! 설에는 떡국을 올립니다.' },
+    z: -0.85,
+    slots: [
+      { id: 'g1_1', x: -1.5 },
+      { id: 'g1_2', x: 0 },
+      { id: 'g1_3', x: 1.5 },
     ],
-    taboos: [],
+    items: ['g_sijeop', 'g_jan', 'g_makgeolli', 'g_songpyeon', 'g_tteokguk'],
   },
   {
     row: 2,
     title: '2열 — 나물·구이·김치',
     guide: '나물·구이·김치를 올려요. ⚠️ <b>전(부침개)처럼 기름에 부친 음식은 올리지 않아도 예에 어긋나지 않아요!</b>',
     rules: ['ganso'],
-    z: 0.15, shopKey: 'row4',
-    items: [
-      { id: 'g_namul', name: '삼색나물', sub: '나물', emoji: '🥬', model: 'namul', x: -1.5,
-        desc: '고사리·도라지·시금치 삼색나물.' },
-      { id: 'g_gui', name: '구이(적)', sub: '구이', emoji: '🍖', model: 'yukjeok', x: 0,
-        desc: '구이(적) 한 가지면 충분해요.' },
-      { id: 'g_kimchi', name: '나박김치', sub: '김치', emoji: '🥗', model: 'kimchi', x: 1.5,
-        desc: '고춧가루 없이 담근 하얀 나박김치.' },
+    z: 0.15,
+    slots: [
+      { id: 'g2_1', x: -1.5 },
+      { id: 'g2_2', x: 0 },
+      { id: 'g2_3', x: 1.5 },
     ],
-    taboos: [
-      { id: 't_yukjeon', name: '육전', sub: '기름에 부침', emoji: '🫓',
-        desc: '성균관 표준안: 기름에 튀기거나 지진 음식(전)은 차례상에 꼭 올리지 않아도 돼요. 「전 부치느라 고생하지 마세요!」' },
-      { id: 't_twigim', name: '모둠튀김', sub: '기름 요리', emoji: '🍤',
-        desc: '튀김도 마찬가지! 사계전서 제찬조에는 "기름진 음식을 쓰는 것은 예가 아니다"라는 기록이 있어요.' },
-    ],
+    items: ['g_namul', 'g_japchae', 'g_gui', 'g_eojeokgui', 'g_kimchi', 'g_yeolmukimchi'],
+    taboos: ['t_yukjeon', 't_twigim'],
   },
   {
     row: 3,
     title: '3열 — 과일 네 가지',
     guide: '과일을 올려요. <b>홍동백서·조율이시는 옛 예법 문헌에 없는 표현</b>이에요. 편한 자리에 놓으세요!',
     rules: ['ganso', 'taboo'],
-    z: 1.05, shopKey: 'row5',
-    items: [
-      { id: 'g_bam', name: '밤', sub: '栗', emoji: '🌰', model: 'bam', x: -1.95,
-        desc: '과일 4~6가지를 편하게 올리면 됩니다.' },
-      { id: 'g_sagwa', name: '사과', sub: '과일', emoji: '🍎', model: 'sagwa', x: -0.65,
-        desc: '어느 자리든 괜찮아요 — 가족 합의가 예법입니다.' },
-      { id: 'g_bae', name: '배', sub: '과일', emoji: '🍐', model: 'bae', x: 0.65,
-        desc: '배치 순서는 자유! 정성이 중요해요.' },
-      { id: 'g_gotgam', name: '곶감', sub: '枾', emoji: '🟠', model: 'gotgam', x: 1.95,
-        desc: '곶감까지 올리면 과일 네 가지 완성!' },
+    z: 1.05,
+    slots: [
+      { id: 'g3_1', x: -1.95 },
+      { id: 'g3_2', x: -0.65 },
+      { id: 'g3_3', x: 0.65 },
+      { id: 'g3_4', x: 1.95 },
     ],
-    taboos: [
-      { id: 't_peach', name: '복숭아', sub: '금기!', emoji: '🍑',
-        desc: '털 있는 복숭아는 귀신(혼령)을 쫓는다고 여겨 제사상에 올리지 않아요. 조상님이 못 오세요!' },
-    ],
+    items: ['g_bam', 'g_sagwa', 'g_bae', 'g_gotgam', 'g_podo', 'g_gyul'],
+    taboos: ['t_peach'],
   },
 ];
 
 // -------------------------------------------------------------------
 // 간편 제사상 모드 — 배달·냉동·즉석식품, 자유 배치, 금기 음식만 피하기
+// 각 열의 items는 slots 수보다 많이 제공 — 좋아하시던 음식 위주로 골라 채우세요.
 // -------------------------------------------------------------------
 export const MODERN_ROWS = [
   {
@@ -320,108 +293,77 @@ export const MODERN_ROWS = [
     title: '1열 — 주식과 음료',
     guide: '<b>간편 제사상</b>! 고인이 좋아하던 음식이면 배달·냉동식품도 괜찮아요. 열 안에서는 <b>빈 자리 아무 곳에나</b> 놓으세요.',
     rules: ['liberal'],
-    z: -0.95, shopKey: 'mrow1',
-    items: [
-      { id: 'm_bap', name: '즉석밥', sub: '전자레인지 2분', emoji: '🍚', model: 'instantBap', x: -2.0,
-        desc: '메(밥) 대신 즉석밥! 정성껏 데워 올리면 됩니다.' },
-      { id: 'm_cola', name: '콜라', sub: '술 대신', emoji: '🥤', model: 'cola', x: -1.0,
-        desc: '술을 못 드시던 분께는 좋아하시던 음료를 올려요.' },
-      { id: 'm_sijeop', name: '시접', sub: '수저 그릇', emoji: '🥢', model: 'sijeop', x: 0,
-        desc: '수저는 간편상에도 기본으로 올립니다.' },
-      { id: 'm_cider', name: '사이다', sub: '음료', emoji: '🫧', model: 'cider', x: 1.0,
-        desc: '시원한 사이다도 OK — 마음이 예법입니다.' },
-      { id: 'm_pizza', name: '냉동피자', sub: '에어프라이어', emoji: '🍕', model: 'pizza', x: 2.0,
-        desc: '고인이 즐기시던 피자! 냉동식품도 정성껏 데우면 훌륭한 제수예요.' },
+    z: -0.95,
+    slots: [
+      { id: 'm1_1', x: -2.0 },
+      { id: 'm1_2', x: -1.0 },
+      { id: 'm1_3', x: 0 },
+      { id: 'm1_4', x: 1.0 },
+      { id: 'm1_5', x: 2.0 },
     ],
-    taboos: [],
+    items: ['m_bap', 'm_cupbap', 'm_cola', 'm_zerocola', 'm_sijeop', 'm_cider', 'm_ion', 'm_pizza', 'm_cheesestick'],
   },
   {
     row: 2,
     title: '2열 — 배달 메인 요리',
     guide: '치킨·족발 같은 <b>배달 메인</b>을 올려요. ⚠️ 단, <b>마늘·매운 양념</b>은 혼령을 쫓는다니 조심!',
     rules: ['liberal', 'taboo'],
-    z: -0.42, shopKey: 'mrow2',
-    items: [
-      { id: 'm_chicken', name: '후라이드치킨', sub: '배달', emoji: '🍗', model: 'chicken', x: -1.9,
-        desc: '양념 안 한 후라이드는 괜찮아요. 실제로 치킨을 올리는 집도 많답니다.' },
-      { id: 'm_jokbal', name: '족발', sub: '배달', emoji: '🍖', model: 'jokbal', x: -0.95,
-        desc: '족발은 돼지고기 수육의 현대판! 고기 제수로 손색없어요.' },
-      { id: 'm_mandu', name: '냉동만두', sub: '찜기 10분', emoji: '🥟', model: 'mandu', x: 0,
-        desc: '냉동만두를 쪄서 올리면 만둣상 부럽지 않아요.' },
-      { id: 'm_tangsu', name: '탕수육', sub: '배달', emoji: '🍢', model: 'tangsu', x: 0.95,
-        desc: '탕수육도 고인이 좋아하셨다면 올릴 수 있어요.' },
-      { id: 'm_gimbap', name: '김밥', sub: '분식', emoji: '🍙', model: 'gimbap', x: 1.9,
-        desc: '정갈하게 썬 김밥 한 줄도 훌륭한 제수!' },
+    z: -0.42,
+    slots: [
+      { id: 'm2_1', x: -1.9 },
+      { id: 'm2_2', x: -0.95 },
+      { id: 'm2_3', x: 0 },
+      { id: 'm2_4', x: 0.95 },
+      { id: 'm2_5', x: 1.9 },
     ],
-    taboos: [
-      { id: 't_garlic', name: '마늘보쌈', sub: '금기!', emoji: '🧄',
-        desc: '마늘처럼 향이 강한 양념은 혼령을 쫓는다고 여겨 제사 음식엔 쓰지 않아요.' },
-    ],
+    items: ['m_chicken', 'm_jokbal', 'm_bossam', 'm_mandu', 'm_tangsu', 'm_gimbap'],
+    taboos: ['t_garlic', 't_yangnyeom'],
   },
   {
     row: 3,
     title: '3열 — 국물 음식 (홀수 전통 잇기)',
     guide: '국물 음식은 전통처럼 <b>홀수(3가지)</b>로! ⚠️ <b>매운 국물</b>은 금기예요.',
     rules: ['liberal', 'hongsu'],
-    z: 0.11, shopKey: 'mrow3',
-    items: [
-      { id: 'm_ramen', name: '컵라면(순한맛)', sub: '뜨거운 물 3분', emoji: '🍜', model: 'cupRamen', x: -1.3,
-        desc: '순한맛 라면이면 OK! 탕 대신 올리는 현대식 국물이에요.' },
-      { id: 'm_eomuk', name: '어묵탕', sub: '냉동 밀키트', emoji: '🍥', model: 'eomukTang', x: 0,
-        desc: '어탕의 현대판, 어묵탕! 밀키트로 10분이면 완성.' },
-      { id: 'm_miyeok', name: '즉석미역국', sub: '파우치', emoji: '🥣', model: 'miyeokGuk', x: 1.3,
-        desc: '파우치 미역국도 데우면 훌륭한 갱(국)이에요. 국물 3가지로 홀수 완성!' },
+    z: 0.11,
+    slots: [
+      { id: 'm3_1', x: -1.3 },
+      { id: 'm3_2', x: 0 },
+      { id: 'm3_3', x: 1.3 },
     ],
-    taboos: [
-      { id: 't_buldak', name: '불닭볶음면', sub: '금기!', emoji: '🌶',
-        desc: '고춧가루의 붉고 매운 기운은 귀신을 쫓는다고 여겨요. 제사 음식은 맵지 않게!' },
-    ],
+    items: ['m_jjajangramen', 'm_eomuk', 'm_sundubu', 'm_miyeok', 'm_gomguk'],
+    taboos: ['t_buldak'],
   },
   {
     row: 4,
     title: '4열 — 간식·사이드',
     guide: '고인이 즐기던 <b>간식</b>을 올려요. ⚠️ <b>붉은 팥</b>이 든 음식은 금기!',
     rules: ['liberal', 'taboo'],
-    z: 0.64, shopKey: 'mrow4',
-    items: [
-      { id: 'm_chips', name: '감자칩', sub: '과자', emoji: '🥔', model: 'chips', x: -1.8,
-        desc: '좋아하시던 과자 한 그릇도 정성이에요.' },
-      { id: 'm_hotdog', name: '냉동핫도그', sub: '에어프라이어', emoji: '🌭', model: 'hotdog', x: -0.6,
-        desc: '아이들도 함께 나눠 먹기 좋은 핫도그!' },
-      { id: 'm_jelly', name: '젤리', sub: '간식', emoji: '🍬', model: 'jelly', x: 0.6,
-        desc: '알록달록 젤리 — 손주가 올리는 정성이에요.' },
-      { id: 'm_choco', name: '초콜릿', sub: '간식', emoji: '🍫', model: 'choco', x: 1.8,
-        desc: '달콤한 초콜릿도 추모의 마음이면 충분해요.' },
+    z: 0.64,
+    slots: [
+      { id: 'm4_1', x: -1.8 },
+      { id: 'm4_2', x: -0.6 },
+      { id: 'm4_3', x: 0.6 },
+      { id: 'm4_4', x: 1.8 },
     ],
-    taboos: [
-      { id: 't_patbingsu', name: '팥빙수', sub: '금기!', emoji: '🍧',
-        desc: '붉은 팥은 예로부터 귀신을 쫓는 음식(동지팥죽)! 조상님 상에는 올리지 않아요.' },
-    ],
+    items: ['m_chips', 'm_cheesecookie', 'm_hotdog', 'm_jelly', 'm_dubaiball', 'm_chocopie'],
+    taboos: ['t_patbingsu'],
   },
   {
     row: 5,
     title: '5열 — 디저트와 과일',
     guide: '마지막 줄은 <b>디저트와 과일</b>! ⚠️ 과일 중에도 금기가 하나 숨어 있어요.',
     rules: ['liberal', 'taboo'],
-    z: 1.15, shopKey: 'mrow5',
-    items: [
-      { id: 'm_berry', name: '딸기', sub: '과일', emoji: '🍓', model: 'strawberry', x: -2.15,
-        desc: '계절 과일도 자유롭게 올려요.' },
-      { id: 'm_banana', name: '바나나', sub: '과일', emoji: '🍌', model: 'banana', x: -1.29,
-        desc: '수입 과일도 OK — 바나나를 올리는 제사상, 이제 낯설지 않아요.' },
-      { id: 'm_cake', name: '조각케이크', sub: '디저트', emoji: '🍰', model: 'cake', x: -0.43,
-        desc: '생신 때 좋아하시던 케이크 한 조각.' },
-      { id: 'm_macaron', name: '마카롱', sub: '디저트', emoji: '🧁', model: 'macaron', x: 0.43,
-        desc: '달콤한 마카롱도 추모의 정성이에요.' },
-      { id: 'm_sagwa', name: '사과', sub: '과일', emoji: '🍎', model: 'sagwa', x: 1.29,
-        desc: '전통 과일도 물론 좋아요.' },
-      { id: 'm_yakgwa', name: '약과', sub: '요즘 대세 한과', emoji: '🍪', model: 'yakgwa', x: 2.15,
-        desc: '할매니얼 간식 약과 — 전통과 현대를 잇는 디저트!' },
+    z: 1.15,
+    slots: [
+      { id: 'm5_1', x: -2.15 },
+      { id: 'm5_2', x: -1.29 },
+      { id: 'm5_3', x: -0.43 },
+      { id: 'm5_4', x: 0.43 },
+      { id: 'm5_5', x: 1.29 },
+      { id: 'm5_6', x: 2.15 },
     ],
-    taboos: [
-      { id: 't_peach2', name: '복숭아', sub: '금기!', emoji: '🍑',
-        desc: '털 있는 복숭아는 귀신을 쫓는다고 여겨 제사상에 올리지 않아요. 조상님이 못 오세요!' },
-    ],
+    items: ['m_berry', 'm_banana', 'm_cheesecake', 'm_buttertteok', 'm_sagwa', 'm_orange', 'm_yakgwa'],
+    taboos: ['t_peach2'],
   },
 ];
 

@@ -19,6 +19,11 @@ document.querySelectorAll('.mode-btn').forEach((btn) => {
   });
 });
 
+// 다음 열로 건너뛰기 (스킵)
+document.getElementById('btn-skip-row').addEventListener('click', () => {
+  game.skipRow();
+});
+
 // 소리 토글
 const $sound = document.getElementById('btn-sound');
 $sound.addEventListener('click', () => {

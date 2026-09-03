@@ -12,6 +12,7 @@ export class UI {
     this.$edu = document.getElementById('edu-toast');
     this.$tray = document.getElementById('tray');
     this.$trayHint = document.getElementById('tray-hint');
+    this.$skipBtn = document.getElementById('btn-skip-row');
     this.eduTimer = null;
 
     this.buildStepper();
@@ -72,6 +73,7 @@ export class UI {
   }
 
   trayHint(text) { this.$trayHint.textContent = text; }
+  setSkipVisible(visible) { this.$skipBtn.classList.toggle('hidden', !visible); }
 
   /** 트레이에 아이템 카드 렌더 — onSelect(id) */
   renderTray(items, onSelect) {

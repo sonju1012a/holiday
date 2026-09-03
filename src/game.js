@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import { RULES, SETUP_STEPS, MODES, TABLE_TOP_Y, TABLE_CENTER_Z } from './data.js';
 import { buildModel } from './models.js';
 import { iconFor } from './icons.js';
+import ITEMS from './shop-links.json';
 
 const SNAP_DIST = 0.55; // 슬롯 흡착 판정 거리
 
@@ -71,13 +72,12 @@ export class Game {
   start(modeKey = 'trad') {
     this.mode = MODES[modeKey] || MODES.trad;
     this.rows = this.mode.rows;
-    // 음식(진짜 제수) + 금기 함정 카드를 열 순서대로 트레이에 배열
-    this.foodItems = this.rows.flatMap((r) => r.items.map((it) => ({ ...it, row: r.row, z: r.z })));
+    // 음식(진짜 제수) + 금기 함정 카드를 열 순서대로 트레이에 배열 — 내용은 shop-links.json에서 조회
     this.trayItems = this.rows.flatMap((r) => [
-      ...r.items.map((it) => ({ ...it, row: r.row })),
-      ...(r.taboos || []).map((t) => ({ ...t, row: r.row, taboo: true })),
+      ...r.items.map((id) => ({ ...ITEMS[id], id, row: r.row, z: r.z })),
+      ...(r.taboos || []).map((id) => ({ ...ITEMS[id], id, row: r.row, z: r.z, taboo: true })),
     ]);
-    this.totalFood = this.foodItems.length;
+    this.totalFood = this.rows.reduce((sum, r) => sum + r.slots.length, 0);
     this.maxScore = SETUP_STEPS.length * 50 + this.totalFood * 100;
     this.ui.buildStepper(this.rows);
     this.phase = 'setup';
@@ -132,9 +132,9 @@ export class Game {
     this.ui.trayHint(this.mode.free
       ? `${row.row}열 음식을 골라 빈 자리 아무 곳에나 놓으세요 (배치 자유!)`
       : `${row.row}열 음식을 골라 상 위의 빛나는 자리에 놓으세요 (${row.row}열부터 차례대로!)`);
+    this.ui.setSkipVisible(true);
     this._updateTrayLocks();
     this._makeSlotMarkers(row);
-    this.shop.recommend(row.shopKey || `row${row.row}`);
     const rowZ = TABLE_CENTER_Z + row.z;
     this._tweenCam([0, 3.6 + row.row * 0.12, rowZ + 3.9], [0, TABLE_TOP_Y, rowZ]);
     this.selectedId = null;
@@ -147,7 +147,8 @@ export class Game {
     this.trayItems.forEach((it) => {
       const card = this.ui.cards[it.id];
       if (!card || card.classList.contains('placed')) return;
-      card.classList.toggle('locked', it.row !== row.row);
+      const slotTaken = !this.mode.free && !it.taboo && it.slot && this.filled.has(it.slot);
+      card.classList.toggle('locked', it.row !== row.row || slotTaken);
     });
   }
 
@@ -173,10 +174,18 @@ export class Game {
       this.ui.markTaboo(id);
       return;
     }
+    // 대체 음식(같은 자리를 가리키는 다른 후보) 중 이미 다른 음식으로 채워진 경우
+    if (!this.mode.free && item.slot && this.filled.has(item.slot)) {
+      this.sfx.wrong();
+      this.ui.shakeCard(id);
+      this.ui.eduToast('이미 채워진 자리예요', '다른 음식으로 이미 채웠어요. 이 열의 다른 빈 자리를 찾아보세요.');
+      return;
+    }
     this.selectedId = id;
     this.ui.markSelected(id);
     this.sfx.select();
     this._setGhost(buildModel(item.model));
+    this.shop.recommend(item.id);
   }
 
   // ================= 클릭 처리 =================
@@ -228,7 +237,7 @@ export class Game {
     const row = this.rows[this.rowIdx];
     // 가장 가까운 빈 슬롯 찾기
     let best = null, bestD = SNAP_DIST;
-    row.items.forEach((slot) => {
+    row.slots.forEach((slot) => {
       if (this.filled.has(slot.id)) return;
       const sx = slot.x, sz = TABLE_CENTER_Z + row.z;
       const d = Math.hypot(p.x - sx, p.z - sz);
@@ -236,9 +245,9 @@ export class Game {
     });
     if (!best) return; // 슬롯 밖 클릭은 무시 (카메라 조작일 수 있음)
 
-    const selected = this.foodItems.find((i) => i.id === this.selectedId);
+    const selected = this.trayItems.find((i) => i.id === this.selectedId);
     // 자유 배치 모드(성균관·간편)에서는 같은 열이면 어느 빈 자리든 정답
-    if (!this.mode.free && best.id !== this.selectedId) {
+    if (!this.mode.free && selected.slot !== best.id) {
       // 오답
       this.wrongCounts[this.selectedId] = (this.wrongCounts[this.selectedId] || 0) + 1;
       this.sfx.wrong();
@@ -271,9 +280,10 @@ export class Game {
     wrong === 0 ? this.sfx.correct() : this.sfx.place();
     this.ui.eduToast(`${selected.name} — 정답! +${gained}점`, selected.desc);
     this.ui.setStageLabel(`진설 ${this.placedCount}/${this.totalFood} · ${row.row}열`);
+    this._updateTrayLocks();
 
     // 열 완료 체크
-    const rowDone = row.items.every((s) => this.filled.has(s.id));
+    const rowDone = row.slots.every((s) => this.filled.has(s.id));
     if (rowDone) {
       this.rowIdx += 1;
       if (this.rowIdx < this.rows.length) {
@@ -285,9 +295,48 @@ export class Game {
     }
   }
 
+  /** 현재 열의 남은 빈 슬롯을 모두 자동으로 채우고 다음 열로 넘어감 (건너뛰기 버튼) */
+  skipRow() {
+    if (this.phase !== 'food') return;
+    const row = this.rows[this.rowIdx];
+    this._clearGhost();
+    this.selectedId = null;
+    this.ui.markSelected(null);
+
+    row.slots.forEach((slot) => {
+      if (this.filled.has(slot.id)) return;
+      const candidate = this.trayItems.find((it) =>
+        it.row === row.row && !it.taboo && !this.placedIds.has(it.id) &&
+        (this.mode.free || it.slot === slot.id)
+      );
+      if (!candidate) return;
+      this.filled.add(slot.id);
+      this.placedIds.add(candidate.id);
+      this.placedCount += 1;
+      this.ui.markPlaced(candidate.id);
+      this._removeSlotMarker(slot.id);
+      const model = buildModel(candidate.model);
+      model.position.set(slot.x, TABLE_TOP_Y, TABLE_CENTER_Z + row.z);
+      this.world.scene.add(model);
+      this._popIn(model);
+    });
+    this._updateTrayLocks();
+    this.sfx.rowClear();
+    this.ui.setStageLabel(`진설 ${this.placedCount}/${this.totalFood} · ${row.row}열`);
+
+    this.rowIdx += 1;
+    if (this.rowIdx < this.rows.length) {
+      setTimeout(() => this._beginRow(), 500);
+    } else {
+      this.ui.setSkipVisible(false);
+      setTimeout(() => this._complete(), 700);
+    }
+  }
+
   // ================= 완성 =================
   _complete() {
     this.phase = 'done';
+    this.ui.setSkipVisible(false);
     this.ui.finishStepper();
     this.ui.setStageLabel('차례상 완성!');
     this.ui.clearTray();
@@ -359,7 +408,7 @@ export class Game {
 
   _makeSlotMarkers(row) {
     this._clearSlotMarkers();
-    row.items.forEach((slot) => {
+    row.slots.forEach((slot) => {
       if (this.filled.has(slot.id)) return;
       const ring = new THREE.Mesh(
         new THREE.RingGeometry(0.19, 0.24, 36),

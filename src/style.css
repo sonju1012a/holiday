@@ -186,12 +186,30 @@ button, a, .tray-card { touch-action: manipulation; } /* 더블탭 확대 방지
   background: linear-gradient(transparent, rgba(15, 9, 4, 0.85) 40%);
   pointer-events: none;
 }
+.tray-top {
+  display: flex; align-items: center; justify-content: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
 #tray-hint {
   text-align: center; font-size: 12px;
   color: rgba(253, 246, 227, 0.75);
-  margin-bottom: 8px;
   text-shadow: 0 1px 3px rgba(0,0,0,.8);
 }
+#btn-skip-row {
+  flex: 0 0 auto;
+  pointer-events: auto;
+  background: rgba(20, 12, 6, 0.72);
+  border: 1px solid rgba(255, 216, 160, 0.35);
+  color: var(--hanji);
+  padding: 6px 12px; border-radius: 999px;
+  font-size: 12px; font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s;
+}
+#btn-skip-row:hover { background: rgba(80, 50, 25, 0.85); }
 #tray {
   display: flex; gap: 10px;
   overflow-x: auto;
@@ -445,7 +463,9 @@ button, a, .tray-card { touch-action: manipulation; } /* 더블탭 확대 방지
   #edu-toast .edu-body { font-size: 12px; }
 
   #tray-wrap { padding: 6px 8px calc(10px + env(safe-area-inset-bottom)); }
-  #tray-hint { font-size: 11px; margin-bottom: 6px; }
+  .tray-top { margin-bottom: 6px; gap: 6px; }
+  #tray-hint { font-size: 11px; }
+  #btn-skip-row { font-size: 11px; padding: 5px 9px; }
   #tray { gap: 8px; padding: 4px 2px 8px; justify-content: flex-start; }
   .tray-card { width: 72px; padding: 8px 4px 7px; border-radius: 12px; }
   .tray-card .t-emoji svg { width: 30px; height: 30px; }
