@@ -8,6 +8,8 @@ import { iconFor } from './icons.js';
 import { makeTextSprite, spawnSparkles, stepSparkles, scorePop } from './fx.js';
 import ITEMS from './shop-links.json';
 
+/** 기준 시점 — scene.js 초기 카메라와 같아 첫 시작엔 이동이 없음 */
+const HOME_CAM = { pos: [0, 4.4, 6.4], target: [0, 0.85, -0.6] };
 const SNAP_DIST = 0.55; // 슬롯 흡착 판정 거리
 const BEST_KEY = (modeKey) => `charye_best_${modeKey}`;
 
@@ -46,7 +48,6 @@ export class Game {
     this.dirLabels = [];           // 西/東 방향 라벨
     this.answerLabels = [];        // '정답 보기' 3D 라벨 [{sprite, ttl}]
     this.snapTarget = null;        // 고스트가 흡착된 슬롯/존 (마커 강조용)
-    this.doneT = 0;                // 완성 후 카메라 스웨이 시간
 
     this.raycaster = new THREE.Raycaster();
     this.pointerNdc = new THREE.Vector2();
@@ -78,9 +79,8 @@ export class Game {
       if (Math.hypot(e.clientX - downX, e.clientY - downY) < 10) this._onClick();
     });
     el.addEventListener('pointermove', setNdc);
-    // 완성 화면에서 사용자가 직접 돌려보기 시작하면 자동 스웨이를 멈춤
-    this.userGrabbed = false;
-    this.world.controls.addEventListener('start', () => { if (this.phase === 'done') this.userGrabbed = true; });
+    // 카메라 트윈 중 사용자가 드래그하면 트윈을 즉시 끊음 — 둘이 동시에 카메라를 움직이면 튐
+    this.world.controls.addEventListener('start', () => { this.camTween = null; });
   }
 
   _raycastPlane() {
@@ -104,6 +104,8 @@ export class Game {
     this.ui.buildIngredientsModal(this.rows);
     this.phase = 'setup';
     this.setupIdx = 0;
+    // 카메라 이동은 시작(기준 시점)과 완성(살짝 뒤로) 두 번만 — 단계·열마다 움직이면 컨트롤과 충돌해 튐/버그가 잦았음
+    this._tweenCam(HOME_CAM.pos, HOME_CAM.target, 0.8);
     this._beginSetupStep();
   }
 
@@ -120,15 +122,12 @@ export class Game {
     if (step.id.startsWith('jibang')) {
       this.movePlane.set(new THREE.Vector3(0, 0, 1), 2.5); // z = -2.5 수직면
       this._makeZoneMarker(step, true);
-      this._tweenCam([0, 2.3, 1.6], [0, 1.5, -2.6]);
     } else if (step.id === 'chotdae' || step.id === 'wipae') {
       this.movePlane.set(new THREE.Vector3(0, 1, 0), -TABLE_TOP_Y);
       this._makeZoneMarker(step, false);
-      this._tweenCam([0, 4.0, 4.8], [0, 0.85, -0.8]);
     } else {
       this.movePlane.set(new THREE.Vector3(0, 1, 0), 0);
       this._makeZoneMarker(step, false);
-      this._tweenCam([0, 4.6, 6.6], [0, 0.85, -0.7]);
     }
 
     // 고스트 생성
@@ -198,8 +197,6 @@ export class Game {
     this._makeSlotMarkers(row);
     this._setRowHighlight(row);
     this._clearAnswerLabels();
-    const rowZ = TABLE_CENTER_Z + row.z;
-    this._tweenCam([0, 3.6 + row.row * 0.12, rowZ + 3.9], [0, TABLE_TOP_Y, rowZ]);
     this.selectedId = null;
     this.ui.markSelected(null);
     this._clearGhost();
@@ -471,10 +468,8 @@ export class Game {
     this._clearDirectionLabels();
     this._clearAnswerLabels();
     this._clearGhost();
-    // 완성 연출: 카메라를 뒤로 빼고, 이후 _tick에서 좌우로 천천히 스웨이
-    // (OrbitControls.autoRotate는 azimuth 제한에 걸리면 한쪽에 멈춰버려 사용하지 않음)
-    this.doneT = 0;
-    this._tweenCam([0, 4.8, 6.2], [0, 0.9, -0.9], 1.4);
+    // 완성 연출: 카메라를 한 번만 살짝 뒤로 — 자동 스웨이는 OrbitControls와 매 프레임 충돌해 제거
+    this._tweenCam([0, 5.0, 7.2], [0, 0.85, -0.9], 1.4);
     // 상 위 전체에 축하 반짝이
     const rows = this.rows;
     rows.forEach((r, i) => setTimeout(() => {
@@ -600,10 +595,14 @@ export class Game {
     const aspect = window.innerWidth / window.innerHeight;
     const toPos = new THREE.Vector3(...camPos);
     const toTarget = new THREE.Vector3(...target);
-    if (aspect < 0.9) {
-      const k = Math.min(1.55, 1 + (0.9 - aspect) * 0.95);
-      toPos.sub(toTarget).multiplyScalar(k).add(toTarget);
-    }
+    const off = toPos.clone().sub(toTarget);
+    if (aspect < 0.9) off.multiplyScalar(Math.min(1.55, 1 + (0.9 - aspect) * 0.95));
+    // OrbitControls 거리 제한 안으로 — 제한 밖 목표로 트윈하면 controls.update()가 매 프레임 되돌려 떨림
+    const { minDistance, maxDistance } = this.world.controls;
+    off.setLength(THREE.MathUtils.clamp(off.length(), minDistance, maxDistance));
+    toPos.copy(toTarget).add(off);
+    const cam = this.world.camera, ctl = this.world.controls;
+    if (cam.position.distanceTo(toPos) < 0.05 && ctl.target.distanceTo(toTarget) < 0.05) return;
     this.camTween = {
       fromPos: this.world.camera.position.clone(),
       toPos,
@@ -686,20 +685,6 @@ export class Game {
         l.sprite.material.opacity = Math.min(1, l.ttl / 0.6);
         return true;
       });
-    }
-
-    // 완성 후 카메라 스웨이 (좌우로 천천히 둘러보기)
-    if (this.phase === 'done' && !this.camTween && !this.userGrabbed) {
-      const target = this.world.controls.target;
-      if (this.doneT === 0) {
-        // 트윈이 끝난 지점의 거리·높이를 그대로 이어받아 튐 없이 시작
-        const off = this.world.camera.position.clone().sub(target);
-        this.swayH = off.y;
-        this.swayR = Math.hypot(off.x, off.z);
-      }
-      this.doneT += dt;
-      const az = Math.sin(this.doneT * 0.32) * 0.62;
-      this.world.camera.position.set(target.x + Math.sin(az) * this.swayR, target.y + this.swayH, target.z + Math.cos(az) * this.swayR);
     }
 
     // 배치 팝 트윈
