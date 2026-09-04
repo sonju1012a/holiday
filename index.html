@@ -8,24 +8,18 @@
   <meta name="description" content="병풍부터 진설까지, 반서갱동·조율이시·홍동백서 같은 차례상 예법을 3D로 직접 차려보며 배우는 교육 게임. 전통 차례상·성균관 표준안·간편 제사상 3가지 모드 제공." />
   <meta name="keywords" content="차례상, 차례상 차리는법, 제사상, 차례상 차리기, 진설법, 반서갱동, 조율이시, 홍동백서, 추석, 설날, 명절 게임" />
   <meta name="author" content="차례상 차리기" />
-  <link rel="canonical" href="https://YOUR_DOMAIN.com/" />
 
   <!-- Open Graph / 카카오톡·페이스북 공유 미리보기 -->
   <meta property="og:type" content="website" />
   <meta property="og:site_name" content="차례상 차리기" />
   <meta property="og:locale" content="ko_KR" />
-  <meta property="og:url" content="https://YOUR_DOMAIN.com/" />
   <meta property="og:title" content="차례상 차리기 — 3D로 배우는 우리 명절 차례상" />
   <meta property="og:description" content="병풍부터 진설까지, 차례상 예법을 3D로 직접 차려보며 배우는 교육 게임. 전통·성균관 표준안·간편 제사상 3가지 모드." />
-  <meta property="og:image" content="https://YOUR_DOMAIN.com/og-image.png" />
-  <meta property="og:image:width" content="1200" />
-  <meta property="og:image:height" content="630" />
 
   <!-- 트위터 카드 -->
-  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:card" content="summary" />
   <meta name="twitter:title" content="차례상 차리기 — 3D로 배우는 우리 명절 차례상" />
   <meta name="twitter:description" content="병풍부터 진설까지, 차례상 예법을 3D로 직접 차려보며 배우는 교육 게임." />
-  <meta name="twitter:image" content="https://YOUR_DOMAIN.com/og-image.png" />
 
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -40,8 +34,7 @@
     "name": "차례상 차리기",
     "description": "병풍부터 진설까지, 차례상 예법을 3D로 직접 차려보며 배우는 교육 게임.",
     "inLanguage": "ko",
-    "genre": "Educational",
-    "url": "https://YOUR_DOMAIN.com/"
+    "genre": "Educational"
   }
   </script>
 </head>
@@ -59,6 +52,7 @@
       <button id="btn-rules" class="hud-btn" title="차례상 규칙 도감">📖 규칙</button>
       <button id="btn-ingredients" class="hud-btn" title="차례상 재료 보기">🧾 재료</button>
       <button id="btn-sound" class="hud-btn" title="소리 켜기/끄기">🔊</button>
+      <button id="btn-home" class="hud-btn" title="처음 화면으로">🏠</button>
     </div>
   </header>
 
@@ -103,9 +97,9 @@
       <h2>차례상 차리기</h2>
       <p class="modal-sub">3D로 배우는 우리 명절 차례상</p>
       <p>
-        병풍을 치고, 상을 펴고, 지방을 모시는 <b>준비 6단계</b>부터<br/>
-        신위에서 가까운 <b>1열 → 5열</b> 순서로 음식을 올리는<br/>
-        <b>진설 5단계</b>까지 — 정석 순서 그대로 체험해 보세요.
+        병풍을 치고, 상을 펴고, 지방을 모시는 <b>준비 단계</b>부터<br/>
+        신위에서 가까운 <b>1열부터 차례대로</b> 음식을 올리는<br/>
+        <b>진설 단계</b>까지 — 정석 순서 그대로 체험해 보세요.
       </p>
       <ul class="intro-rules">
         <li>🀄 반서갱동 · 어동육서 · 좌포우혜 · 조율이시 · 홍동백서</li>
@@ -134,6 +128,7 @@
           <small>우리 집 차례상 그대로 · 처사(處士) · 4대 8위</small>
         </button>
       </div>
+      <button id="btn-shoplist-intro" class="btn-secondary shoplist-open" data-open-shoplist>🛒 차례상 구매 리스트 보기</button>
       <a id="request-charye" class="request-link"
          href="mailto:sonju1012jja@gmail.com?subject=%EC%9A%B0%EB%A6%AC%EC%A7%91%20%EC%B0%A8%EB%A1%80%EC%83%81%20%EB%93%B1%EB%A1%9D%20%EC%9A%94%EC%B2%AD&body=%EC%95%88%EB%85%95%ED%95%98%EC%84%B8%EC%9A%94%21%20%EC%A0%80%ED%9D%AC%20%EC%A7%91%20%EC%B0%A8%EB%A1%80%EC%83%81%EC%9D%84%20%EA%B2%8C%EC%9E%84%EC%97%90%20%EB%93%B1%EB%A1%9D%ED%95%98%EA%B3%A0%20%EC%8B%B6%EC%96%B4%EC%9A%94%21%0A%0A%5B%EB%AC%B8%EC%A4%91/%EC%A7%80%EC%97%AD%5D%3A%20%0A%5B%EC%A7%80%EB%B0%A9%C2%B7%EC%9C%84%ED%8C%A8%20%EB%AC%B8%EA%B5%AC%5D%3A%20%28%ED%95%9C%EC%9E%90%20%EC%9B%90%EB%AC%B8%20%EB%98%90%EB%8A%94%20%EC%82%AC%EC%A7%84%20%EC%A4%91%20%ED%95%98%EB%82%98%EB%A1%9C%20%EC%95%8C%EB%A0%A4%EC%A3%BC%EC%84%B8%EC%9A%94%20%E2%80%94%20%EC%B2%98%EC%82%AC/%ED%95%99%EC%83%9D%20%EC%97%AC%EB%B6%80%2C%20%EB%AA%87%20%EB%8C%80%EA%B9%8C%EC%A7%80%20%EB%AA%A8%EC%8B%9C%EB%8A%94%EC%A7%80%EB%8F%84%20%ED%95%A8%EA%BB%98%29%0A%0A%5B1%EC%97%B4%5D%3A%20%0A%5B2%EC%97%B4%5D%3A%20%0A%5B3%EC%97%B4%5D%3A%20%0A%5B4%EC%97%B4%5D%3A%20%0A%5B5%EC%97%B4%5D%3A%20%0A%28%EC%97%B4%EC%9D%B4%20%EB%8D%94%20%EC%9E%88%EC%9C%BC%EB%A9%B4%20%EC%9D%B4%EC%96%B4%EC%84%9C%20%EC%A0%81%EC%96%B4%EC%A3%BC%EC%84%B8%EC%9A%94%29%0A%0A%E2%80%BB%20%EC%83%81%20%EC%A0%84%EC%B2%B4%EA%B0%80%20%EC%9E%98%20%EB%B3%B4%EC%9D%B4%EB%8A%94%20%EC%82%AC%EC%A7%84%EC%9D%84%20%EA%BC%AD%20%EC%B2%A8%EB%B6%80%ED%95%B4%20%EC%A3%BC%EC%84%B8%EC%9A%94%21">
         📮 우리집 차례상도 등록 요청하기
@@ -167,40 +162,42 @@
       <h2>차례상 완성! 🎉</h2>
       <div id="final-stars"></div>
       <p id="final-score"></p>
+      <p id="final-best" class="hidden"></p>
       <div id="final-summary"></div>
 
-      <!-- 선물세트 추천 (쇼핑 미참여 시 노출) -->
-      <div id="giftset-reco" class="hidden">
-        <div class="gift-badge">🎁 마지막 추천</div>
-        <div class="gift-options">
-          <div class="gift-card">
-            <div class="gift-tag">쉬운 차례상</div>
-            <h3 id="gift-easytable-name"></h3>
-            <p id="gift-easytable-desc"></p>
-            <div class="gift-price">
-              <b id="gift-easytable-sale"></b>
-              <s id="gift-easytable-price"></s>
-            </div>
-            <a id="gift-easytable-link" class="btn-primary gift-btn" target="_blank" rel="noopener">토스쇼핑에서 보기 →</a>
-          </div>
-          <div class="gift-card">
-            <div class="gift-tag">명절 선물세트</div>
-            <h3 id="gift-hanwoo-name"></h3>
-            <p id="gift-hanwoo-desc"></p>
-            <div class="gift-price">
-              <b id="gift-hanwoo-sale"></b>
-              <s id="gift-hanwoo-price"></s>
-            </div>
-            <a id="gift-hanwoo-link" class="btn-primary gift-btn" target="_blank" rel="noopener">토스쇼핑에서 보기 →</a>
-          </div>
-        </div>
-      </div>
+      <!-- 구매 리스트 (인트로와 동일한 모달, 방금 차린 모드 음식이 먼저 나옴) -->
+      <button id="btn-shoplist-complete" class="btn-primary shoplist-open hidden" data-open-shoplist>🛒 오늘 차린 차례상 구매 리스트 보기</button>
 
       <div class="complete-actions">
         <button id="btn-replay" class="btn-secondary">다시 차리기</button>
-        <a id="btn-online-charye" class="btn-secondary" href="https://YOUR_ONLINE_CHARYE_URL" target="_blank" rel="noopener">👨‍👩‍👧 가족과 온라인 차례지내기</a>
+        <a id="btn-online-charye" class="btn-secondary hidden" href="#" target="_blank" rel="noopener">👨‍👩‍👧 가족과 온라인 차례지내기</a>
       </div>
       <p class="fine-print">※ 성균관 의례정립위원회는 간소한 차례상도 예에 어긋나지 않는다고 안내합니다.<br/>지역·가문마다 진설법이 다를 수 있어요.</p>
+    </div>
+  </div>
+
+  <!-- 차례상 구매 리스트 모달 -->
+  <div id="modal-shoplist" class="modal hidden">
+    <div class="modal-card wide">
+      <h2>🛒 차례상 구매 리스트</h2>
+      <p class="modal-sub">차례상에 올라가는 음식과 준비물을 토스쇼핑에서 바로 볼 수 있어요.</p>
+      <div id="shoplist-tabs"></div>
+      <div id="shoplist-list"></div>
+      <button class="btn-primary modal-close">닫기</button>
+    </div>
+  </div>
+
+  <!-- 종료 확인 모달 (뒤로가기·🏠 버튼) -->
+  <div id="modal-exit" class="modal hidden">
+    <div class="modal-card">
+      <div class="modal-deco">止</div>
+      <h2>그만 차릴까요?</h2>
+      <p>지금까지 차린 상은 저장되지 않아요.<br/>처음 화면으로 돌아가면 다시 시작해야 해요.</p>
+      <div class="complete-actions">
+        <button id="btn-exit-stay" class="btn-primary">계속 차리기</button>
+        <button id="btn-exit-home" class="btn-secondary">처음 화면으로</button>
+      </div>
+      <button id="btn-exit-close" class="request-link hidden">✕ 미니앱 종료</button>
     </div>
   </div>
 

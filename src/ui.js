@@ -21,18 +21,17 @@ export class UI {
     this.buildRulesModal();
     this.buildIngredientsModal(FOOD_ROWS);
 
-    document.getElementById('btn-rules').addEventListener('click', () => {
-      document.getElementById('modal-rules').classList.remove('hidden');
+    const $rules = document.getElementById('modal-rules');
+    const $ingr = document.getElementById('modal-ingredients');
+    document.getElementById('btn-rules').addEventListener('click', () => $rules.classList.remove('hidden'));
+    document.getElementById('btn-ingredients').addEventListener('click', () => $ingr.classList.remove('hidden'));
+    // 닫기 버튼 · 바깥(배경) 탭 · ESC 모두로 닫힘 (인트로·완성 모달은 제외)
+    [$rules, $ingr].forEach(($m) => {
+      $m.querySelector('.modal-close').addEventListener('click', () => $m.classList.add('hidden'));
+      $m.addEventListener('click', (e) => { if (e.target === $m) $m.classList.add('hidden'); });
     });
-    document.querySelector('#modal-rules .modal-close').addEventListener('click', () => {
-      document.getElementById('modal-rules').classList.add('hidden');
-    });
-
-    document.getElementById('btn-ingredients').addEventListener('click', () => {
-      document.getElementById('modal-ingredients').classList.remove('hidden');
-    });
-    document.querySelector('#modal-ingredients .modal-close').addEventListener('click', () => {
-      document.getElementById('modal-ingredients').classList.add('hidden');
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') [$rules, $ingr].forEach(($m) => $m.classList.add('hidden'));
     });
   }
 
@@ -111,6 +110,19 @@ export class UI {
     });
   }
   clearTray() { this.$tray.innerHTML = ''; this.cards = {}; }
+  /** 카드 부제(작은 글씨) 교체 — 다른 열 카드에 "N열" 표시 등 */
+  setCardSub(id, text) {
+    const c = this.cards[id];
+    const sub = c && c.querySelector('.t-sub');
+    if (sub && sub.textContent !== text) sub.textContent = text;
+  }
+  /** 해당 카드가 트레이 왼쪽에 오도록 가로 스크롤 */
+  scrollTrayTo(id) {
+    const c = this.cards[id];
+    if (!c) return;
+    const left = Math.max(0, c.offsetLeft - this.$tray.offsetLeft - 12);
+    this.$tray.scrollTo({ left, behavior: 'smooth' });
+  }
   markSelected(id) {
     Object.values(this.cards).forEach((c) => c.classList.remove('selected'));
     if (id && this.cards[id]) this.cards[id].classList.add('selected');
@@ -141,9 +153,16 @@ export class UI {
       .join('');
   }
 
-  showComplete({ score, maxScore, summary, stars }) {
-    document.getElementById('final-stars').textContent = '★'.repeat(stars) + '☆'.repeat(3 - stars);
+  showComplete({ score, maxScore, summary, stars, bestLine = '', isNewBest = false }) {
+    const $stars = document.getElementById('final-stars');
+    $stars.innerHTML = Array.from({ length: 3 }, (_, i) =>
+      `<span class="star ${i < stars ? 'on' : ''}" style="animation-delay:${0.15 + i * 0.18}s">${i < stars ? '★' : '☆'}</span>`
+    ).join('');
     document.getElementById('final-score').textContent = `${score}점 / ${maxScore}점`;
+    const $best = document.getElementById('final-best');
+    $best.textContent = bestLine;
+    $best.classList.toggle('new', isNewBest);
+    $best.classList.toggle('hidden', !bestLine);
     document.getElementById('final-summary').innerHTML = summary;
     document.getElementById('modal-complete').classList.remove('hidden');
   }

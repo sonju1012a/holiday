@@ -3,6 +3,7 @@
 // ===================================================================
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 export function createWorld(container) {
   const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -17,6 +18,13 @@ export function createWorld(container) {
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x1e1610);
   scene.fog = new THREE.Fog(0x1e1610, 14, 26);
+
+  // 환경맵 — 놋그릇(유기)·촛대 같은 금속 재질이 실제로 반사광을 받아 반짝이게 함.
+  // 조명만으로는 metalness 재질이 어둡고 탁하게 보이기 때문에 PBR에는 필수.
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  scene.environmentIntensity = 0.55; // 한옥 실내의 은은한 분위기를 유지하도록 약하게
+  pmrem.dispose();
 
   const camera = new THREE.PerspectiveCamera(46, window.innerWidth / window.innerHeight, 0.1, 60);
   camera.position.set(0, 4.4, 6.4);
@@ -144,6 +152,29 @@ export function createWorld(container) {
   rightWall.rotation.y = -Math.PI / 2;
   rightWall.position.x = 9;
   room.add(leftWall, rightWall);
+
+  // 천장 — 대들보·서까래가 보이는 한옥 대청 느낌 (카메라가 낮아질 때 상단에 드러남)
+  const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(30, 30), new THREE.MeshStandardMaterial({ color: 0x4a3420, roughness: 0.95 }));
+  ceiling.rotation.x = Math.PI / 2;
+  ceiling.position.y = 6.2;
+  room.add(ceiling);
+  const beamMat = new THREE.MeshStandardMaterial({ color: 0x3a2716, roughness: 0.85 });
+  const girder = new THREE.Mesh(new THREE.BoxGeometry(18.4, 0.42, 0.5), beamMat); // 대들보
+  girder.position.set(0, 5.95, -1.2);
+  room.add(girder);
+  for (let i = -6; i <= 6; i++) { // 서까래
+    const rafter = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.2, 14), beamMat);
+    rafter.position.set(i * 1.45, 6.08, -0.5);
+    room.add(rafter);
+  }
+  // 기둥 (양옆)
+  const pillarGeo = new THREE.CylinderGeometry(0.22, 0.25, 6.2, 14);
+  [[-6.8, -5.9], [6.8, -5.9], [-8.6, 3.2], [8.6, 3.2]].forEach(([x, z]) => {
+    const pillar = new THREE.Mesh(pillarGeo, beamMat);
+    pillar.position.set(x, 3.1, z);
+    pillar.castShadow = true;
+    room.add(pillar);
+  });
   scene.add(room);
 
   // ---------- 애니메이션 루프 ----------

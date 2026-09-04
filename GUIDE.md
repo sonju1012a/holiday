@@ -19,8 +19,7 @@ npm run dev      # http://localhost:5199 (granite.config.ts 기준 포트)
 npm run build    # dist/ 생성
 ```
 
-모바일 화면 확인: 개발 서버 실행 후 `http://localhost:5199/mobile-test.html`
-(390×780 iframe으로 세로 화면을 재현하는 개발 전용 페이지 — 배포 전 `public/mobile-test.html` 삭제 권장)
+모바일 화면 확인: 브라우저 개발자 도구의 기기 에뮬레이션(390×780)을 사용하세요.
 
 ### 게임 구성
 
@@ -46,7 +45,9 @@ src/
 ├── models.js    # 절차 생성 3D 모델 (전통 제기 + 현대 음식, 외부 에셋 없음)
 ├── icons.js     # 트레이용 전통 SVG 아이콘 26종 (간편 모드는 이모지 사용)
 ├── scene.js     # 렌더러·조명·한옥 배경, 세로 화면 FOV 자동 조정
-├── shop.js      # ★ 토스쇼핑 수익화 — SHOP_CATALOG, openExternal(openURL 브릿지)
+├── shop.js      # ★ 토스쇼핑 수익화 — 구매 리스트 모달, 추천 토스트, openExternal(openURL 브릿지)
+├── env.js       # 빌드 타깃 플래그 (IS_TOSS / SHOP_TOASTS / ONLINE_CHARYE_URL)
+├── nav.js       # 뒤로가기(백버튼) 처리 + 종료 확인 모달
 ├── ui.js        # DOM UI (스텝퍼·배너·토스트·트레이·모달)
 ├── audio.js     # WebAudio 효과음
 └── style.css    # 한지 테마 + 모바일(640px 이하) 대응
@@ -54,25 +55,33 @@ src/
 
 **음식/규칙 수정**: `data.js`만 고치면 됩니다. 새 음식 = 열의 `items`에 항목 추가 + `models.js`의 `BUILDERS`에 모델 빌더 등록 (+ 전통 모드라면 `icons.js`에 아이콘).
 
-### 수익화 — 토스쇼핑 쉐어링크 교체 (필수 ★)
+### 수익화 — 토스쇼핑 쉐어링크
 
-`src/shop.js`의 `SHOP_CATALOG`에서 `link` 값 **17개**를 본인의 쉐어링크로 교체하세요.
-발급: 토스앱 → 쇼핑 → 상품 → 공유 → 링크 복사.
+`src/shop-links.json`의 `link` 값을 본인의 쉐어링크로 교체하세요. 발급: 토스앱 → 쇼핑 → 상품 → 공유 → 링크 복사.
+아직 교체하지 않은 항목(`YOUR_SHARE_LINK`)은 게임 어디에도 노출되지 않으므로, 채운 것만 자동으로 보입니다.
 
-| 키 | 노출 시점 |
-|---|---|
-| `byeongpung` `dotjari` `sang` `jibang` `chotdae` `hyangno` | 준비 단계 배치 직후 |
-| `row1`~`row5` | 전통/성균관 모드 열 시작 시 |
-| `mrow1`~`mrow5` | 간편 제사상 모드 열 시작 시 |
-| `giftset` | **쉐어링크를 한 번도 안 누르고 완주한 유저에게** 완성 화면에서 강조 노출 |
+| 노출 지점 | 웹 빌드 | 앱인토스 빌드 |
+|---|---|---|
+| 🛒 구매 리스트 모달 (인트로 첫 화면 버튼 · 완성 화면 버튼) | ✅ | ✅ |
+| 게임 중 추천 토스트 (준비 단계·열 시작·아이템 선택) | ✅ | ❌ (심사 다크패턴 조항 회피) |
 
-동작 방식: 추천 토스트는 9초 뒤 자동으로 닫히고 같은 추천은 반복되지 않습니다. 링크 클릭 여부는 `sessionStorage`(`charye_engaged`)에 저장되어 "다시 차리기" 후에도 유지됩니다.
+구매 리스트는 `세트 → 준비물 → 모드별 음식` 탭으로 구성되며, 완성 화면에서 열면 방금 차린 모드가 먼저 나옵니다. 금기 음식은 목록에서 제외됩니다.
+
+### 빌드 타깃 분기 (.env)
+
+| 파일 | 명령 | 내용 |
+|---|---|---|
+| `.env` | `npm run build`, `npm run dev` | 웹 배포용. 쇼핑 토스트 켬 |
+| `.env.toss` | `npm run build:toss` (granite 번들도 동일) | 앱인토스용. 쇼핑 토스트 끔, 외부 서비스 링크 숨김 |
+
+코드에서는 `src/env.js`의 `IS_TOSS` / `SHOP_TOASTS` / `ONLINE_CHARYE_URL`만 참조합니다.
+`VITE_ONLINE_CHARYE_URL`을 채우면 완성 화면에 '가족과 온라인 차례지내기' 버튼이 나타납니다 (비우면 숨김 — 앱인토스는 '자사 서비스 이동 유도 금지' 조항이 있어 비워 두세요).
 
 ### 앱인토스 배포
 
 1. **콘솔 등록**: [앱인토스 콘솔](https://console.apps-in-toss.toss.im)에서 미니앱 등록 (앱 이름·표시명·아이콘 업로드)
 2. **설정 동기화**: `granite.config.ts`의 `appName`(→ 딥링크 `intoss://{appName}`), `brand.displayName`, `brand.icon`(콘솔 이미지 URL)을 콘솔 등록값과 동일하게 수정
-3. **빌드·업로드**: `npm run build` 후 `.ait` 번들 업로드 (압축 해제 기준 100MB 이하 — 현재 번들 약 600KB로 여유 충분)
+3. **빌드·업로드**: `npm run build:toss` 후 `.ait` 번들 업로드 (압축 해제 기준 100MB 이하 — 현재 번들 약 600KB로 여유 충분)
 4. **출시**: 콘솔에서 테스트 1회 이상 → '검토 요청하기' → 승인(영업일 최대 3일) → '출시하기'
 
 **외부 링크 규칙**: 미니앱 안에서는 `window.open` 대신 SDK의 `openURL()`을 써야 합니다. 이미 `shop.js`의 `openExternal()`이 처리합니다 (토스 안 → `openURL`, 일반 브라우저 → `window.open` 폴백). 새 외부 링크를 추가할 땐 반드시 `openExternal()`을 거치세요.
@@ -125,10 +134,22 @@ public/style.css   # 한지 테마, 모바일(760px 이하) 세로 레이아웃
 
 ## 3. 출시 전 체크리스트
 
-- [ ] `test/src/shop.js` — 쉐어링크 17개 교체 (`https://link.toss.im/YOUR_SHARE_LINK` 검색)
+앱인토스 게임 체크리스트 대응 현황 (코드로 처리된 항목):
+
+| 체크리스트 항목 | 구현 |
+|---|---|
+| 사운드 On/Off | HUD 🔊 버튼 |
+| 백그라운드 전환 시 사운드 즉시 종료 / 복귀 시 재생 | `main.js` visibilitychange·pagehide·blur → `Sfx.suspend()/resume()` |
+| 안드로이드 백버튼 → 뒤로가기 또는 종료 | `nav.js` — 인트로에서는 컨테이너가 종료, 게임 중에는 보조 모달 닫기 → 종료 확인 모달 |
+| 종료 시 확인 모달 | `#modal-exit` (계속 차리기 / 처음 화면으로 / 미니앱 종료`closeView`) |
+| 모든 화면에서 이탈 수단 | HUD 🏠 버튼 + 토스 내비바 닫기 |
+| 예측 불가능한 CTA·다크패턴 금지 | 앱인토스 빌드는 게임 중 쇼핑 토스트 없음, 구매 리스트는 사용자가 직접 열기 |
+| Safe Area | `style.css` env(safe-area-inset-*) |
+
+
+- [ ] `src/shop-links.json` — 남은 `YOUR_SHARE_LINK` 24개 교체 (미교체 항목은 자동 숨김)
 - [ ] `test/granite.config.ts` — `appName` / `displayName` / `icon` 콘솔 등록값으로 교체
-- [ ] `test/index.html` — `btn-online-charye`의 href를 online-charye 배포 주소로 교체
-- [ ] `test/public/mobile-test.html` 삭제 (개발 전용)
+- [ ] (웹 배포 시) `.env`의 `VITE_ONLINE_CHARYE_URL`에 online-charye 배포 주소 입력
 - [ ] online-charye를 HTTPS로 배포하고 두 기기에서 화상 연결 테스트
 - [ ] (선택) online-charye 장보기 링크를 토스쇼핑 쉐어링크로 교체
 - [ ] 앱인토스 콘솔에서 테스트 → 검토 요청 → 출시

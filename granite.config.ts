@@ -14,7 +14,7 @@ export default defineConfig({
     port: 5199,
     commands: {
       dev: 'vite --port 5199 --strictPort',
-      build: 'vite build',
+      build: 'vite build --mode toss', // .env.toss 적용 (쇼핑 토스트 끔·외부 링크 숨김)
     },
   },
   permissions: [],

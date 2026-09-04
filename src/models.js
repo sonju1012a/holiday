@@ -13,6 +13,47 @@ const MAT = {
   paper:  new THREE.MeshStandardMaterial({ color: 0xfaf3e0, roughness: 0.9 }),
 };
 
+/** 절차 생성 나뭇결 텍스처 — 상판·향상 등 넓은 목재 면에 사용 */
+function woodTexture(base = '#5c3a21', grain = 'rgba(30,16,6,0.45)', light = 'rgba(140,95,55,0.22)') {
+  const c = document.createElement('canvas');
+  c.width = 512; c.height = 256;
+  const ctx = c.getContext('2d');
+  ctx.fillStyle = base;
+  ctx.fillRect(0, 0, 512, 256);
+  for (let k = 0; k < 42; k++) {
+    const y0 = (k / 42) * 256 + Math.sin(k * 2.3) * 3;
+    ctx.strokeStyle = k % 3 === 0 ? light : grain;
+    ctx.lineWidth = k % 3 === 0 ? 2.2 : 0.9 + (k % 2) * 0.6;
+    ctx.beginPath();
+    ctx.moveTo(0, y0);
+    for (let x = 0; x <= 512; x += 16) {
+      ctx.lineTo(x, y0 + Math.sin(x * 0.012 + k * 1.7) * 2.4 + Math.sin(x * 0.045 + k) * 0.8);
+    }
+    ctx.stroke();
+  }
+  // 옹이
+  [[120, 70], [360, 190]].forEach(([x, y]) => {
+    for (let r = 14; r > 2; r -= 3) {
+      ctx.strokeStyle = grain; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.ellipse(x, y, r * 1.6, r, 0.2, 0, Math.PI * 2); ctx.stroke();
+    }
+  });
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  tex.anisotropy = 4;
+  return tex;
+}
+let _tableTopMat = null;
+function tableTopMat() {
+  if (!_tableTopMat) {
+    const tex = woodTexture();
+    tex.repeat.set(2.2, 1);
+    _tableTopMat = new THREE.MeshStandardMaterial({ map: tex, roughness: 0.55, metalness: 0.05 });
+  }
+  return _tableTopMat;
+}
+
 function mesh(geo, mat, x = 0, y = 0, z = 0) {
   const m = new THREE.Mesh(geo, mat);
   m.position.set(x, y, z);
@@ -168,7 +209,7 @@ export function buildDotjari() {
 export function buildSang() {
   const g = new THREE.Group();
   const topW = 6.9, topD = 2.75, topY = 0.82;
-  const top = mesh(new THREE.BoxGeometry(topW, 0.09, topD), MAT.wood, 0, topY - 0.045, 0);
+  const top = mesh(new THREE.BoxGeometry(topW, 0.09, topD), tableTopMat(), 0, topY - 0.045, 0);
   // 상판 테두리(전)
   const rim = mesh(new THREE.BoxGeometry(topW + 0.12, 0.05, topD + 0.12), MAT.woodDark, 0, topY - 0.085, 0);
   g.add(top, rim);
@@ -276,7 +317,7 @@ export function buildChotdae() {
 export function buildHyangsang() {
   const g = new THREE.Group();
   // 작은 향상
-  const top = mesh(new THREE.BoxGeometry(1.05, 0.06, 0.62), MAT.wood, 0, 0.42, 0);
+  const top = mesh(new THREE.BoxGeometry(1.05, 0.06, 0.62), tableTopMat(), 0, 0.42, 0);
   [[-0.45, -0.24], [0.45, -0.24], [-0.45, 0.24], [0.45, 0.24]].forEach(([x, z]) =>
     g.add(mesh(new THREE.BoxGeometry(0.07, 0.4, 0.07), MAT.woodDark, x, 0.2, z)));
   g.add(top);

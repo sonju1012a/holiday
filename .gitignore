@@ -1,2 +1,6 @@
 node_modules/
 dist/
+
+# 로컬 개인 설정 (쉐어링크 등)
+.env.local
+.env.*.local

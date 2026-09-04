@@ -169,7 +169,7 @@ export const MYFAMILY_SETUP_STEPS = SETUP_STEPS.flatMap((s) => {
     emoji: '📜',
     model: `jibang_mf_${i}`,
     pos: a.pos,
-    zone: 0.14,
+    zone: 0.3, // 모바일에서 손가락으로 누를 수 있는 최소 반경 (모퉁이 간격 0.69의 절반 이내)
     guide: i === 0
       ? '병풍에 지방(紙榜)을 부부(考/妣)가 한 장에 나란히 적힌 형태로 붙입니다. 남자 조상은 「학생(學生)」 대신 우리 집 관례대로 <b>「처사(處士)」</b>를 씁니다.'
       : `병풍에 <b>${a.label}</b> 지방을 붙여주세요.`,

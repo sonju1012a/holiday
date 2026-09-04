@@ -5,9 +5,19 @@ import * as THREE from 'three';
 import { RULES, SETUP_STEPS, MODES, TABLE_TOP_Y, TABLE_CENTER_Z } from './data.js';
 import { buildModel } from './models.js';
 import { iconFor } from './icons.js';
+import { makeTextSprite, spawnSparkles, stepSparkles, scorePop } from './fx.js';
 import ITEMS from './shop-links.json';
 
 const SNAP_DIST = 0.55; // 슬롯 흡착 판정 거리
+const BEST_KEY = (modeKey) => `charye_best_${modeKey}`;
+
+/** 모드별 최고 기록 { score, stars } (localStorage) */
+export function loadBest(modeKey) {
+  try { return JSON.parse(localStorage.getItem(BEST_KEY(modeKey))) || null; } catch (_) { return null; }
+}
+function saveBest(modeKey, rec) {
+  try { localStorage.setItem(BEST_KEY(modeKey), JSON.stringify(rec)); } catch (_) { /* 프라이빗 모드 등 */ }
+}
 
 export class Game {
   constructor(world, ui, shop, sfx) {
@@ -31,6 +41,12 @@ export class Game {
     this.filled = new Set();
     this.tweens = [];
     this.camTween = null;
+    this.particles = [];           // 반짝이 파티클
+    this.rowHighlight = null;      // 현재 진설 중인 열 강조 띠
+    this.dirLabels = [];           // 西/東 방향 라벨
+    this.answerLabels = [];        // '정답 보기' 3D 라벨 [{sprite, ttl}]
+    this.snapTarget = null;        // 고스트가 흡착된 슬롯/존 (마커 강조용)
+    this.doneT = 0;                // 완성 후 카메라 스웨이 시간
 
     this.raycaster = new THREE.Raycaster();
     this.pointerNdc = new THREE.Vector2();
@@ -62,6 +78,9 @@ export class Game {
       if (Math.hypot(e.clientX - downX, e.clientY - downY) < 10) this._onClick();
     });
     el.addEventListener('pointermove', setNdc);
+    // 완성 화면에서 사용자가 직접 돌려보기 시작하면 자동 스웨이를 멈춤
+    this.userGrabbed = false;
+    this.world.controls.addEventListener('start', () => { if (this.phase === 'done') this.userGrabbed = true; });
   }
 
   _raycastPlane() {
@@ -122,10 +141,48 @@ export class Game {
     this.rowIdx = 0;
     this.movePlane.set(new THREE.Vector3(0, 1, 0), -TABLE_TOP_Y);
     this.ui.renderTray(
-      this.trayItems.map((it) => ({ ...it, icon: it.taboo ? null : iconFor(it.model) })),
+      this.trayItems.map((it) => ({
+        ...it,
+        icon: it.taboo ? null : iconFor(it.model),
+        // 함정 카드에 "금기!"라고 써 있으면 함정이 아니므로 트레이에서는 숨김 (설명은 고른 뒤 토스트로)
+        sub: it.taboo && it.sub === '금기!' ? '' : it.sub,
+      })),
       (id) => this._onTraySelect(id)
     );
+    if (!this.mode.free) this._showDirectionLabels();
     this._beginRow();
+  }
+
+  /** 상 양 끝에 西(왼쪽)·東(오른쪽) 라벨 — 방향 규칙(반서갱동·어동육서 등)을 보며 배치할 수 있게 */
+  _showDirectionLabels() {
+    this._clearDirectionLabels();
+    const y = TABLE_TOP_Y + 0.42;
+    const west = makeTextSprite('◀ 西 서쪽', { scale: 0.3, fg: '#fdf6e3', bg: 'rgba(30,18,8,0.82)', border: 'rgba(255,216,160,0.6)' });
+    const east = makeTextSprite('東 동쪽 ▶', { scale: 0.3, fg: '#fdf6e3', bg: 'rgba(30,18,8,0.82)', border: 'rgba(255,216,160,0.6)' });
+    west.position.set(-3.95, y, TABLE_CENTER_Z);
+    east.position.set(3.95, y, TABLE_CENTER_Z);
+    this.dirLabels = [west, east];
+    this.dirLabels.forEach((s) => this.world.scene.add(s));
+  }
+  _clearDirectionLabels() {
+    this.dirLabels.forEach((s) => this.world.scene.remove(s));
+    this.dirLabels = [];
+  }
+
+  /** 지금 진설 중인 열을 상판 위에 은은한 띠로 표시 */
+  _setRowHighlight(row) {
+    if (!this.rowHighlight) {
+      this.rowHighlight = new THREE.Mesh(
+        new THREE.PlaneGeometry(6.6, 0.5),
+        new THREE.MeshBasicMaterial({ color: 0xffd070, transparent: true, opacity: 0.1, depthWrite: false })
+      );
+      this.rowHighlight.rotation.x = -Math.PI / 2;
+      this.world.scene.add(this.rowHighlight);
+    }
+    this.rowHighlight.position.set(0, TABLE_TOP_Y + 0.006, TABLE_CENTER_Z + row.z);
+  }
+  _clearRowHighlight() {
+    if (this.rowHighlight) { this.world.scene.remove(this.rowHighlight); this.rowHighlight = null; }
   }
 
   _beginRow() {
@@ -139,11 +196,16 @@ export class Game {
     this.ui.setAnswerVisible(true);
     this._updateTrayLocks();
     this._makeSlotMarkers(row);
+    this._setRowHighlight(row);
+    this._clearAnswerLabels();
     const rowZ = TABLE_CENTER_Z + row.z;
     this._tweenCam([0, 3.6 + row.row * 0.12, rowZ + 3.9], [0, TABLE_TOP_Y, rowZ]);
     this.selectedId = null;
     this.ui.markSelected(null);
     this._clearGhost();
+    // 트레이는 모든 열의 카드를 한 줄로 담고 있어 길다 — 지금 열의 첫 카드로 스크롤
+    const first = this.trayItems.find((it) => it.row === row.row && !this.placedIds.has(it.id));
+    if (first) this.ui.scrollTrayTo(first.id);
   }
 
   _updateTrayLocks() {
@@ -152,7 +214,11 @@ export class Game {
       const card = this.ui.cards[it.id];
       if (!card || card.classList.contains('placed')) return;
       const slotTaken = !this.mode.free && !it.taboo && it.slot && this.filled.has(it.slot);
-      card.classList.toggle('locked', it.row !== row.row || slotTaken);
+      const otherRow = it.row !== row.row;
+      card.classList.toggle('locked', otherRow || slotTaken);
+      // 다른 열 카드는 몇 열 것인지 표시해 두어 "왜 안 눌리지?"를 없앰
+      const baseSub = it.taboo && it.sub === '금기!' ? '' : (it.sub || '');
+      this.ui.setCardSub(it.id, otherRow ? `${it.row}열` : baseSub);
     });
   }
 
@@ -215,6 +281,7 @@ export class Game {
     // 배치 확정
     this._clearGhost();
     this._removeZoneMarker();
+    this.snapTarget = null;
     const model = buildModel(step.model);
     model.position.set(...step.pos);
     this.world.scene.add(model);
@@ -223,6 +290,12 @@ export class Game {
     this.sfx.place();
     this.score += 50;
     this.ui.setScore(this.score);
+    const fxPos = new THREE.Vector3(...step.pos);
+    if (step.id === 'byeongpung') fxPos.y += 1.2;
+    else if (step.id === 'sang') fxPos.y = TABLE_TOP_Y;
+    else if (step.id === 'hyangno') fxPos.y = 0.5;
+    this.particles.push(...spawnSparkles(this.world.scene, fxPos, 16));
+    scorePop(this.world.camera, fxPos, '+50');
     this.ui.eduToast(step.edu.title, step.edu.body);
     this.shop.recommend(step.shop);
 
@@ -256,11 +329,13 @@ export class Game {
       this.wrongCounts[this.selectedId] = (this.wrongCounts[this.selectedId] || 0) + 1;
       this.sfx.wrong();
       this._flashSlot(best.id);
+      this._shakeGhost();
       const ruleNames = row.rules.map((k) => RULES[k].name).join(', ');
       this.ui.eduToast(
         `그 자리는 ${best.name} 자리예요!`,
         `${selected.desc} (참고: ${ruleNames})`
       );
+      scorePop(this.world.camera, new THREE.Vector3(best.x, TABLE_TOP_Y + 0.2, TABLE_CENTER_Z + row.z), '다시!', 'bad');
       return;
     }
 
@@ -275,6 +350,7 @@ export class Game {
     this.ui.markPlaced(this.selectedId);
     this._removeSlotMarker(best.id);
     this._clearGhost();
+    this.snapTarget = null;
     this.selectedId = null;
 
     const model = buildModel(selected.model);
@@ -282,6 +358,8 @@ export class Game {
     this.world.scene.add(model);
     this._popIn(model);
     wrong === 0 ? this.sfx.correct() : this.sfx.place();
+    this.particles.push(...spawnSparkles(this.world.scene, model.position, wrong === 0 ? 14 : 8));
+    scorePop(this.world.camera, new THREE.Vector3(best.x, TABLE_TOP_Y + 0.25, TABLE_CENTER_Z + row.z), `+${gained}`);
     this.ui.eduToast(`${selected.name} — 정답! +${gained}점`, selected.desc);
     this.ui.setStageLabel(`진설 ${this.placedCount}/${this.totalFood} · ${row.row}열`);
     this._updateTrayLocks();
@@ -354,8 +432,28 @@ export class Game {
           return `${s.name} 자리 → <b>${item ? item.name : '?'}</b>`;
         });
       body = lines.join('<br/>');
+      this._showAnswerLabels(row); // 상 위 빈 자리마다 정답 이름을 직접 띄움
     }
     this.ui.eduToast('💡 정답 보기', body, 6000);
+  }
+
+  /** 정답 보기 — 빈 슬롯 위에 들어갈 음식 이름을 3D 라벨로 6초간 표시 */
+  _showAnswerLabels(row) {
+    this._clearAnswerLabels();
+    row.slots.forEach((s) => {
+      if (this.filled.has(s.id)) return;
+      const item = row.items.map((id) => ITEMS[id]).find((it) => it.slot === s.id);
+      if (!item) return;
+      const sp = makeTextSprite(item.name, { scale: 0.26, fg: '#2f6d51', border: 'rgba(47,109,81,0.8)' });
+      sp.position.set(s.x, TABLE_TOP_Y + 0.38, TABLE_CENTER_Z + row.z);
+      sp.userData.baseY = sp.position.y;
+      this.world.scene.add(sp);
+      this.answerLabels.push({ sprite: sp, ttl: 6 });
+    });
+  }
+  _clearAnswerLabels() {
+    this.answerLabels.forEach(({ sprite }) => this.world.scene.remove(sprite));
+    this.answerLabels = [];
   }
 
   // ================= 완성 =================
@@ -369,24 +467,44 @@ export class Game {
     this.ui.trayHint('');
     this.$hideBanner();
     this.sfx.fanfare();
-    this.world.controls.autoRotate = true;
-    this.world.controls.autoRotateSpeed = 0.7;
-    this._tweenCam([0, 4.8, 6.2], [0, 0.9, -0.9]);
+    this._clearRowHighlight();
+    this._clearDirectionLabels();
+    this._clearAnswerLabels();
+    this._clearGhost();
+    // 완성 연출: 카메라를 뒤로 빼고, 이후 _tick에서 좌우로 천천히 스웨이
+    // (OrbitControls.autoRotate는 azimuth 제한에 걸리면 한쪽에 멈춰버려 사용하지 않음)
+    this.doneT = 0;
+    this._tweenCam([0, 4.8, 6.2], [0, 0.9, -0.9], 1.4);
+    // 상 위 전체에 축하 반짝이
+    const rows = this.rows;
+    rows.forEach((r, i) => setTimeout(() => {
+      r.slots.forEach((s) => this.particles.push(...spawnSparkles(this.world.scene, new THREE.Vector3(s.x, TABLE_TOP_Y + 0.1, TABLE_CENTER_Z + r.z), 5)));
+    }, 200 + i * 160));
 
     const wrongTotal = Object.values(this.wrongCounts).reduce((a, b) => a + b, 0);
     const ratio = this.score / this.maxScore;
     const stars = ratio >= 0.9 ? 3 : ratio >= 0.7 ? 2 : 1;
-    const tabooLine = this.tabooCaught > 0
-      ? `금기 음식 실수: ${this.tabooCaught}회 — 복숭아·팥·매운 양념·마늘은 기억해요!`
-      : '금기 음식을 하나도 올리지 않았어요. 훌륭해요! 👏';
+    const hasTaboo = rows.some((r) => r.taboos && r.taboos.length);
+    const tabooLine = !hasTaboo ? ''
+      : this.tabooCaught > 0
+        ? ` · 금기 음식 실수: ${this.tabooCaught}회 — 복숭아·팥·매운 양념·마늘은 기억해요!`
+        : ' · 금기 음식을 하나도 올리지 않았어요. 훌륭해요! 👏';
     const summary = `
       <b>오늘 배운 것 — ${this.mode.label}</b><br/>
       ${this.mode.summary}<br/>
-      <span style="color:#8a7050">틀린 횟수: ${wrongTotal}회 · ${tabooLine}</span>`;
+      <span style="color:#8a7050">틀린 횟수: ${wrongTotal}회${tabooLine}</span>`;
 
-    this.shop.fillGiftSet(); // 쇼핑 미참여 시 선물세트 추천
+    // 최고 기록 (모드별, 기기에 저장)
+    const prev = loadBest(this.mode.key);
+    const isNewBest = !prev || this.score > prev.score;
+    if (isNewBest) saveBest(this.mode.key, { score: this.score, stars, maxScore: this.maxScore });
+    const bestLine = isNewBest
+      ? (prev ? `🏆 최고 기록 갱신! (이전 ${prev.score}점)` : '🏆 첫 완성 기록!')
+      : `최고 기록 ${prev.score}점 · ${'★'.repeat(prev.stars)}`;
+
+    this.shop.prepareComplete(this.mode.key); // 완성 화면 '구매 리스트 보기' 버튼
     setTimeout(() => {
-      this.ui.showComplete({ score: this.score, maxScore: this.maxScore, summary, stars });
+      this.ui.showComplete({ score: this.score, maxScore: this.maxScore, summary, stars, bestLine, isNewBest });
     }, 1600);
   }
 
@@ -409,6 +527,12 @@ export class Game {
   }
   _clearGhost() {
     if (this.ghost) { this.world.scene.remove(this.ghost); this.ghost = null; }
+    this.snapTarget = null;
+  }
+  /** 오답 시 고스트를 좌우로 짧게 흔듦 */
+  _shakeGhost() {
+    if (!this.ghost) return;
+    this.ghost.userData.shake = 0.35;
   }
 
   _makeZoneMarker(step, vertical) {
@@ -458,8 +582,9 @@ export class Game {
   _flashSlot(id) {
     const m = this.slotMarkers.get(id);
     if (!m) return;
+    m.userData.flashing = true;
     m.material.color.set(0xe04030);
-    setTimeout(() => m.material.color.set(0xffd070), 500);
+    setTimeout(() => { m.userData.flashing = false; m.material.color.set(0xffd070); }, 500);
   }
 
   // ================= 애니메이션 =================
@@ -488,23 +613,94 @@ export class Game {
     };
   }
 
+  /** 고스트가 흡착할 대상 계산 — 진설: 가장 가까운 빈 슬롯 / 준비: 존 중심 */
+  _findSnap(p) {
+    if (this.phase === 'food') {
+      const row = this.rows[this.rowIdx];
+      let best = null, bestD = SNAP_DIST;
+      row.slots.forEach((slot) => {
+        if (this.filled.has(slot.id)) return;
+        const d = Math.hypot(p.x - slot.x, p.z - (TABLE_CENTER_Z + row.z));
+        if (d < bestD) { best = slot; bestD = d; }
+      });
+      return best ? { id: best.id, pos: [best.x, TABLE_TOP_Y, TABLE_CENTER_Z + row.z] } : null;
+    }
+    if (this.phase === 'setup') {
+      const step = this.setupSteps[this.setupIdx];
+      if (!step) return null;
+      const vertical = step.id.startsWith('jibang');
+      const d = vertical ? Math.hypot(p.x - step.pos[0], p.y - step.pos[1]) : Math.hypot(p.x - step.pos[0], p.z - step.pos[2]);
+      // 큰 준비물(병풍·돗자리·상)은 존이 넓어 흡착하면 오히려 뚝뚝 끊겨 보임 — 작은 것만 흡착
+      if (d < step.zone && step.zone <= 1.2) return { id: step.id, pos: vertical ? [step.pos[0], step.pos[1], -2.52] : step.pos };
+    }
+    return null;
+  }
+
   _tick(dt) {
     const t = performance.now() / 1000;
-    // 고스트 따라다니기
+    // 고스트 따라다니기 (+ 가까운 자리에 부드럽게 흡착)
     if (this.ghost) {
       const p = this._raycastPlane();
       if (p) {
-        if (this.phase === 'setup' && this.setupSteps[this.setupIdx]?.id.startsWith('jibang')) {
-          this.ghost.position.set(p.x, p.y, -2.52);
-        } else {
-          this.ghost.position.set(p.x, -this.movePlane.constant, p.z);
-        }
+        const snap = this._findSnap(p);
+        this.snapTarget = snap ? snap.id : null;
+        const target = snap
+          ? new THREE.Vector3(...snap.pos)
+          : (this.phase === 'setup' && this.setupSteps[this.setupIdx]?.id.startsWith('jibang'))
+            ? new THREE.Vector3(p.x, p.y, -2.52)
+            : new THREE.Vector3(p.x, -this.movePlane.constant, p.z);
+        // 흡착 중엔 lerp로 미끄러지듯, 아니면 즉시 따라감
+        if (snap) this.ghost.position.lerp(target, Math.min(1, dt * 18));
+        else this.ghost.position.copy(target);
+      }
+      if (this.ghost.userData.shake > 0) {
+        this.ghost.userData.shake -= dt;
+        this.ghost.position.x += Math.sin(this.ghost.userData.shake * 60) * 0.06 * (this.ghost.userData.shake / 0.35);
       }
     }
-    // 마커 펄스
+    // 마커 펄스 (흡착된 마커는 크고 밝게)
     const pulse = 0.8 + Math.sin(t * 4.2) * 0.2;
-    if (this.zoneMarker) { this.zoneMarker.scale.setScalar(pulse); this.zoneMarker.material.opacity = 0.5 + Math.sin(t * 4.2) * 0.3; }
-    this.slotMarkers.forEach((m) => { m.scale.setScalar(pulse); m.material.opacity = 0.45 + Math.sin(t * 4.2) * 0.28; });
+    if (this.zoneMarker) {
+      const hot = this.snapTarget && this.phase === 'setup';
+      this.zoneMarker.scale.setScalar(hot ? 1.1 : pulse);
+      this.zoneMarker.material.opacity = hot ? 1 : 0.5 + Math.sin(t * 4.2) * 0.3;
+      this.zoneMarker.material.color.setHex(hot ? 0xfff0b0 : 0xffd070);
+    }
+    this.slotMarkers.forEach((m, id) => {
+      const hot = id === this.snapTarget;
+      m.scale.setScalar(hot ? 1.35 : pulse);
+      m.material.opacity = hot ? 1 : 0.45 + Math.sin(t * 4.2) * 0.28;
+      if (!m.userData.flashing) m.material.color.setHex(hot ? 0xfff0b0 : 0xffd070);
+    });
+    if (this.rowHighlight) this.rowHighlight.material.opacity = 0.08 + Math.sin(t * 2.1) * 0.04;
+
+    // 반짝이 파티클
+    if (this.particles.length) this.particles = stepSparkles(this.world.scene, this.particles, dt);
+
+    // 정답 라벨 — 살짝 떠다니다 사라짐
+    if (this.answerLabels.length) {
+      this.answerLabels = this.answerLabels.filter((l) => {
+        l.ttl -= dt;
+        if (l.ttl <= 0) { this.world.scene.remove(l.sprite); return false; }
+        l.sprite.position.y = l.sprite.userData.baseY + Math.sin(t * 2.5 + l.sprite.position.x) * 0.03;
+        l.sprite.material.opacity = Math.min(1, l.ttl / 0.6);
+        return true;
+      });
+    }
+
+    // 완성 후 카메라 스웨이 (좌우로 천천히 둘러보기)
+    if (this.phase === 'done' && !this.camTween && !this.userGrabbed) {
+      const target = this.world.controls.target;
+      if (this.doneT === 0) {
+        // 트윈이 끝난 지점의 거리·높이를 그대로 이어받아 튐 없이 시작
+        const off = this.world.camera.position.clone().sub(target);
+        this.swayH = off.y;
+        this.swayR = Math.hypot(off.x, off.z);
+      }
+      this.doneT += dt;
+      const az = Math.sin(this.doneT * 0.32) * 0.62;
+      this.world.camera.position.set(target.x + Math.sin(az) * this.swayR, target.y + this.swayH, target.z + Math.cos(az) * this.swayR);
+    }
 
     // 배치 팝 트윈
     this.tweens = this.tweens.filter((tw) => {
