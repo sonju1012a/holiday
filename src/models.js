@@ -263,21 +263,22 @@ export function buildJibang(columns, scale = 1, colWidth = 0.34) {
   return g;
 }
 
-// 일직 손가 35세손 — 부모·조부모·증조부모·고조부모 4대 8위를
-// 실제 사진처럼 부부(考/妣)가 한 장에 나란히 적힌 지방 4장으로 모십니다.
+// 일직 손가 35세손 — 아버님이 생존해 계시므로 부모 대는 모시지 않고,
+// 조부모·증조부모·고조부모 3대 6위를 실제 사진처럼 부부(考/妣)가
+// 한 장에 나란히 적힌 지방 3장으로 모십니다.
+// 조상님의 휘(諱, 이름)는 쓰지 않고 남자는 「處士府君」, 여자는 「孺人 + 본관 + 氏」로만 적습니다.
 export const MYFAMILY_JIBANG_PAIRS = [
-  ['顯考處士府君神位', '顯妣孺人達城徐氏神位'],
   ['顯祖考處士府君神位', '顯祖妣孺人海平尹氏神位'],
   ['顯曾祖考處士府君神位', '顯曾祖妣孺人眞城李氏神位'],
-  ['顯高祖考處士府君神位', '顯高祖妣孺人坡平尹氏神位'],
+  ['顯高祖考處士府君神位', '顯高祖妣孺人邊城谷氏神位'],
 ];
 export function buildMyFamilyJibang(idx) {
   return buildJibang(MYFAMILY_JIBANG_PAIRS[idx], 0.5, 0.2);
 }
 
-// 단일 제사(기제사)용 위패 — 지방과 같은 방식으로 병풍에 붙입니다.
+// 단일 제사(기제사)용 위패 — 실물 사진처럼 고조부모님 내외를 한 장에 나란히 적습니다.
 export function buildWipae() {
-  return buildJibang(['顯考處士府君神位'], 0.55, 0.3);
+  return buildJibang(MYFAMILY_JIBANG_PAIRS[2], 0.55, 0.24);
 }
 
 export function buildChotdae() {

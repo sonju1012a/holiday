@@ -293,15 +293,14 @@ export class Game {
     else if (step.id === 'hyangno') fxPos.y = 0.5;
     this.particles.push(...spawnSparkles(this.world.scene, fxPos, 16));
     scorePop(this.world.camera, fxPos, '+50');
-    this.ui.eduToast(step.edu.title, step.edu.body);
     this.shop.recommend(step.shop);
 
     this.setupIdx += 1;
-    if (this.setupIdx < this.setupSteps.length) {
-      setTimeout(() => this._beginSetupStep(), 600);
-    } else {
-      setTimeout(() => this._beginFoodPhase(), 800);
-    }
+    // 설명을 다 읽고 화면을 탭해야 다음 단계로 — 예전엔 0.6초 뒤 자동으로 넘어가 설명을 놓쳤음
+    const next = this.setupIdx < this.setupSteps.length
+      ? () => this._beginSetupStep()
+      : () => this._beginFoodPhase();
+    this.ui.eduToastGate(step.edu.title, step.edu.body, next);
   }
 
   _tryFoodPlace() {
@@ -357,21 +356,22 @@ export class Game {
     wrong === 0 ? this.sfx.correct() : this.sfx.place();
     this.particles.push(...spawnSparkles(this.world.scene, model.position, wrong === 0 ? 14 : 8));
     scorePop(this.world.camera, new THREE.Vector3(best.x, TABLE_TOP_Y + 0.25, TABLE_CENTER_Z + row.z), `+${gained}`);
-    this.ui.eduToast(`${selected.name} — 정답! +${gained}점`, selected.desc);
     this.ui.setStageLabel(`진설 ${this.placedCount}/${this.totalFood} · ${row.row}열`);
     this._updateTrayLocks();
 
-    // 열 완료 체크
+    // 열 완료 체크 — 열이 끝날 때만 설명을 붙잡고, 열 중간이면 기존대로 잠깐 보여주고 사라짐
     const rowDone = row.slots.every((s) => this.filled.has(s.id));
-    if (rowDone) {
-      this.rowIdx += 1;
-      if (this.rowIdx < this.rows.length) {
-        this.sfx.rowClear();
-        setTimeout(() => this._beginRow(), 900);
-      } else {
-        setTimeout(() => this._complete(), 1000);
-      }
+    const title = `${selected.name} — 정답! +${gained}점`;
+    if (!rowDone) {
+      this.ui.eduToast(title, selected.desc);
+      return;
     }
+    this.rowIdx += 1;
+    if (this.rowIdx < this.rows.length) this.sfx.rowClear();
+    const next = this.rowIdx < this.rows.length
+      ? () => this._beginRow()
+      : () => this._complete();
+    this.ui.eduToastGate(title, selected.desc, next);
   }
 
   /** 현재 열의 남은 빈 슬롯을 모두 자동으로 채우고 다음 열로 넘어감 (건너뛰기 버튼) */

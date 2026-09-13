@@ -4,3 +4,6 @@ dist/
 # 로컬 개인 설정 (쉐어링크 등)
 .env.local
 .env.*.local
+
+# 앱인토스 배포 아티팩트 (ait build 산출물)
+*.ait

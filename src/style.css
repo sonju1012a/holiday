@@ -135,6 +135,16 @@ button, a, .tray-card { touch-action: manipulation; } /* 더블탭 확대 방지
   color: var(--dancheong-green);
 }
 #edu-toast .edu-body { font-size: 13px; line-height: 1.6; }
+/* 탭 대기 상태에서만 보이는 안내 — 평소(자동 사라짐 토스트)엔 숨김 */
+#edu-toast .edu-tap { display: none; }
+#edu-toast.gated .edu-tap {
+  display: block; margin-top: 9px;
+  font-size: 12px; font-weight: 700; color: var(--dancheong-green);
+  animation: eduTapPulse 1.4s ease-in-out infinite;
+}
+@keyframes eduTapPulse { 0%, 100% { opacity: .45; } 50% { opacity: 1; } }
+/* 설명을 다 읽을 때까지 다음 단계를 붙잡는 투명 레이어 (모달 z-index 50/60보다 아래) */
+#edu-gate { position: fixed; inset: 0; z-index: 29; background: transparent; }
 @keyframes slideUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
 
 /* ---------- 쇼핑 토스트 ---------- */

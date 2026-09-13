@@ -1,6 +1,5 @@
 {
   "_readme": "이 파일이 모든 음식/준비물의 단일 관리 파일입니다. name/sub/emoji/model/desc는 게임 안에서 쓰이는 표시 정보이고, shopName/shopDesc/link는 토스쇼핑 추천에 쓰이는 실제 상품 정보입니다. link 값만 본인의 쉐어링크로 교체하면 됩니다. 모든 상품은 '세트/번들'이 아니라 실제로 검색해서 살 수 있는 단품 기준으로 작성하세요. data.js는 이 파일의 id만 참조합니다 — 새 음식을 추가하려면 여기에 항목을 만들고 data.js의 해당 열 items/taboos 배열에 id만 추가하세요.",
-
   "byeongpung": {
     "shopName": "접이식 병풍 (6폭)",
     "shopDesc": "명절 차례·제사에 두루 쓰는 접이식 병풍이에요.",
@@ -31,7 +30,6 @@
     "shopDesc": "향상 위에 올리는 놋쇠 향로.",
     "link": "https://toss.im/_m/HUIiNqWD"
   },
-
   "giftset_easytable": {
     "shopName": "제사상차림 1호상 (3~4인용)",
     "shopDesc": "24종 음식이 다 차려진 완성형 제사상 — 힘들게 만들 필요 없이 바로 올려요.",
@@ -46,58 +44,57 @@
     "salePrice": "64,800원",
     "link": "https://toss.im/_m/haF6k5Hy"
   },
-
-  "me_m": {
-    "name": "송편(남)",
-    "sub": "남자 조상 메",
+  "me": {
+    "name": "송편",
+    "sub": "메(밥)",
     "emoji": "🥟",
     "model": "songpyeon",
-    "slot": "me_m",
-    "desc": "남자 조상께 올리는 메(밥) 자리 — 추석엔 송편, 설엔 떡국을 올려요. 남좌여우에 따라 서쪽!",
+    "slot": "me",
+    "desc": "메(밥) 자리 — 추석엔 송편, 설엔 떡국을 올려요. 반서갱동에 따라 서쪽(왼쪽)!",
     "shopName": "찹쌀 송편",
     "shopDesc": "갓 빚은 찹쌀 송편.",
     "link": "https://toss.im/_m/l407o1Jn"
   },
-  "tteokguk_m": {
-    "name": "떡국(남)",
+  "tteokguk": {
+    "name": "떡국",
     "sub": "설날 메 대신",
     "emoji": "🍥",
     "model": "guk",
-    "slot": "me_m",
-    "desc": "설 차례에는 메 대신 떡국을 올려요. 자리는 그대로 남자 조상 쪽(서쪽)입니다.",
+    "slot": "me",
+    "desc": "설 차례에는 메 대신 떡국을 올려요. 자리는 그대로 메 자리(서쪽)입니다.",
     "shopName": "사골 떡국떡",
     "shopDesc": "설 차례에 올리는 사골 떡국떡.",
     "link": "https://toss.im/_m/LW9FYmcx"
   },
-  "guk_m": {
-    "name": "국(남)",
+  "guk": {
+    "name": "국",
     "sub": "갱",
     "emoji": "🍲",
     "model": "guk",
-    "slot": "guk_m",
-    "desc": "남자 조상의 국(갱). 반서갱동 — 메(밥)의 동쪽 옆에 놓습니다.",
+    "slot": "guk",
+    "desc": "국(갱)이에요. 반서갱동 — 메(밥)의 동쪽(오른쪽)에 놓습니다.",
     "shopName": "소고기뭇국",
     "shopDesc": "차례상에 올리기 좋은 맑은 소고기뭇국.",
     "link": "https://toss.im/_m/P8VSyQi3"
   },
-  "jan_m": {
-    "name": "청주(남)",
+  "jan": {
+    "name": "청주",
     "sub": "잔반",
     "emoji": "🥃",
     "model": "sulJan",
-    "slot": "jan_m",
-    "desc": "남자 조상께 올리는 술잔(잔반)입니다.",
+    "slot": "jan",
+    "desc": "조상께 올리는 술잔(잔반)입니다.",
     "shopName": "청주",
     "shopDesc": "차례용으로 많이 쓰는 맑은 청주.",
     "link": "https://toss.im/_m/RdB4XkT4"
   },
-  "makgeolli_m": {
-    "name": "막걸리(남)",
+  "makgeolli": {
+    "name": "막걸리",
     "sub": "잔반 대체",
     "emoji": "🍶",
     "model": "sulJan",
-    "slot": "jan_m",
-    "desc": "지역에 따라 청주 대신 막걸리를 올리기도 해요. 자리는 같은 남자 조상 쪽!",
+    "slot": "jan",
+    "desc": "지역에 따라 청주 대신 막걸리를 올리기도 해요. 자리는 같은 술잔 자리!",
     "shopName": "생막걸리",
     "shopDesc": "지역 전통에 따라 올리는 생막걸리.",
     "link": "https://toss.im/_m/DqhwjMf7"
@@ -113,62 +110,6 @@
     "shopDesc": "시접에 담기 좋은 유기 수저.",
     "link": "https://toss.im/_m/ZWmZ3GP5"
   },
-  "jan_f": {
-    "name": "청주(여)",
-    "sub": "잔반",
-    "emoji": "🥃",
-    "model": "sulJan",
-    "slot": "jan_f",
-    "desc": "여자 조상께 올리는 술잔. 남좌여우 — 여자 조상 것은 동쪽!",
-    "shopName": "청주",
-    "shopDesc": "차례용으로 많이 쓰는 맑은 청주.",
-    "link": "https://toss.im/_m/RdB4XkT4"
-  },
-  "makgeolli_f": {
-    "name": "막걸리(여)",
-    "sub": "잔반 대체",
-    "emoji": "🍶",
-    "model": "sulJan",
-    "slot": "jan_f",
-    "desc": "여자 조상 잔도 지역에 따라 막걸리로 대신할 수 있어요. 동쪽 자리는 그대로!",
-    "shopName": "생막걸리",
-    "shopDesc": "지역 전통에 따라 올리는 생막걸리.",
-    "link": "https://toss.im/_m/DqhwjMf7"
-  },
-  "me_f": {
-    "name": "송편(여)",
-    "sub": "여자 조상 메",
-    "emoji": "🥟",
-    "model": "songpyeon",
-    "slot": "me_f",
-    "desc": "여자 조상께 올리는 메(송편). 동쪽에 여자 조상의 상을 차립니다.",
-    "shopName": "찹쌀 송편",
-    "shopDesc": "갓 빚은 찹쌀 송편.",
-    "link": "https://toss.im/_m/l407o1Jn"
-  },
-  "tteokguk_f": {
-    "name": "떡국(여)",
-    "sub": "설날 메 대신",
-    "emoji": "🍥",
-    "model": "guk",
-    "slot": "me_f",
-    "desc": "설 차례라면 여자 조상 자리에도 떡국을 올려요. 자리는 동쪽 그대로.",
-    "shopName": "사골 떡국떡",
-    "shopDesc": "설 차례에 올리는 사골 떡국떡.",
-    "link": "https://toss.im/_m/LW9FYmcx"
-  },
-  "guk_f": {
-    "name": "국(여)",
-    "sub": "갱",
-    "emoji": "🍲",
-    "model": "guk",
-    "slot": "guk_f",
-    "desc": "여자 조상의 국. 이 세트에서도 국은 메의 동쪽입니다.",
-    "shopName": "소고기뭇국",
-    "shopDesc": "차례상에 올리기 좋은 맑은 소고기뭇국.",
-    "link": "https://toss.im/_m/P8VSyQi3"
-  },
-
   "yukjeok": {
     "name": "육적",
     "sub": "고기 구이",
@@ -334,7 +275,6 @@
     "shopDesc": "맵지 않게 끓인 동태탕 밀키트.",
     "link": "https://toss.im/_m/jNVsQhTe"
   },
-
   "po": {
     "name": "북어포",
     "sub": "포",
@@ -429,7 +369,6 @@
     "emoji": "🌶",
     "desc": "고춧가루가 들어간 빨간 김치는 제사상 금기! 이 자리엔 하얀 나박김치·백김치만 올려요."
   },
-
   "daechu": {
     "name": "대추",
     "sub": "棗",
@@ -535,7 +474,6 @@
     "emoji": "🍑",
     "desc": "털 있는 복숭아는 귀신(혼령)을 쫓는다고 여겨 제사상에 올리지 않아요. 과일 줄이라고 예외는 아니에요!"
   },
-
   "g_sijeop": {
     "name": "시접",
     "sub": "수저 그릇",
@@ -586,7 +524,6 @@
     "shopDesc": "설 차례에 올리는 떡국떡.",
     "link": "https://toss.im/_m/LW9FYmcx"
   },
-
   "g_namul": {
     "name": "삼색나물",
     "sub": "나물",
@@ -659,7 +596,6 @@
     "emoji": "🍤",
     "desc": "튀김도 마찬가지! 사계전서 제찬조에는 \"기름진 음식을 쓰는 것은 예가 아니다\"라는 기록이 있어요."
   },
-
   "g_bam": {
     "name": "밤",
     "sub": "栗",
@@ -720,7 +656,6 @@
     "shopDesc": "손질 없이 바로 올리기 좋은 귤.",
     "link": "https://toss.im/_m/BwHvOtE9"
   },
-
   "m_bap": {
     "name": "즉석밥",
     "sub": "전자레인지 2분",
@@ -811,7 +746,6 @@
     "shopDesc": "에어프라이어 냉동 치즈스틱.",
     "link": "https://toss.im/_m/HHLeUQdd"
   },
-
   "m_chicken": {
     "name": "후라이드치킨",
     "sub": "배달",
@@ -884,7 +818,6 @@
     "emoji": "🌶",
     "desc": "고춧가루 베이스의 매운 양념은 제사상 금기! 치킨은 후라이드로 올려요."
   },
-
   "m_jjajangramen": {
     "name": "짜장라면",
     "sub": "컵라면 대체",
@@ -941,7 +874,6 @@
     "emoji": "🌶",
     "desc": "고춧가루의 붉고 매운 기운은 귀신을 쫓는다고 여겨요. 제사 음식은 맵지 않게!"
   },
-
   "m_chips": {
     "name": "감자칩",
     "sub": "과자",
@@ -1008,7 +940,6 @@
     "emoji": "🍧",
     "desc": "붉은 팥은 예로부터 귀신을 쫓는 음식(동지팥죽)! 조상님 상에는 올리지 않아요."
   },
-
   "m_berry": {
     "name": "딸기",
     "sub": "과일",
@@ -1085,7 +1016,6 @@
     "emoji": "🍑",
     "desc": "털 있는 복숭아는 귀신을 쫓는다고 여겨 제사상에 올리지 않아요. 조상님이 못 오세요!"
   },
-
   "mf_jan": {
     "name": "청주",
     "sub": "잔반",
@@ -1119,7 +1049,6 @@
     "shopDesc": "차례상에 올리기 좋은 맑은 소고기뭇국.",
     "link": "https://link.toss.im/YOUR_SHARE_LINK"
   },
-
   "mf_muneotang": {
     "name": "문어탕",
     "sub": "조림",
@@ -1153,7 +1082,6 @@
     "shopDesc": "조림하기 좋은 장조림용 소고기.",
     "link": "https://link.toss.im/YOUR_SHARE_LINK"
   },
-
   "mf_ojingeo": {
     "name": "오징어",
     "sub": "포",
@@ -1209,7 +1137,6 @@
     "shopDesc": "삶아서 바로 올리기 좋은 구운란.",
     "link": "https://link.toss.im/YOUR_SHARE_LINK"
   },
-
   "mf_hamjeon": {
     "name": "햄전",
     "sub": "전",
@@ -1265,7 +1192,6 @@
     "shopDesc": "전 부치기 좋은 부추.",
     "link": "https://link.toss.im/YOUR_SHARE_LINK"
   },
-
   "mf_mu": {
     "name": "무나물",
     "sub": "나물",

@@ -11,11 +11,13 @@ export class UI {
     this.$stepper = document.getElementById('stepper');
     this.$banner = document.getElementById('guide-banner');
     this.$edu = document.getElementById('edu-toast');
+    this.$eduGate = document.getElementById('edu-gate');
     this.$tray = document.getElementById('tray');
     this.$trayHint = document.getElementById('tray-hint');
     this.$skipBtn = document.getElementById('btn-skip-row');
     this.$answerBtn = document.getElementById('btn-show-answer');
     this.eduTimer = null;
+    this.eduGateFn = null;   // 탭을 기다리는 중인 '다음 단계' 콜백
 
     this.buildStepper();
     this.buildRulesModal();
@@ -32,6 +34,12 @@ export class UI {
     });
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') [$rules, $ingr].forEach(($m) => $m.classList.add('hidden'));
+    });
+
+    // 설명 대기 해제 — 화면 아무 데나 탭(데스크톱은 Enter/Space)하면 다음 단계로
+    this.$eduGate.addEventListener('pointerup', () => this.releaseEduGate());
+    document.addEventListener('keydown', (e) => {
+      if (this.eduGateFn && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); this.releaseEduGate(); }
     });
   }
 
@@ -85,11 +93,39 @@ export class UI {
   }
 
   eduToast(title, body, ms = 6500) {
+    this._fillEdu(title, body);
+    this.$edu.classList.remove('gated');
+    clearTimeout(this.eduTimer);
+    this.eduTimer = setTimeout(() => this.$edu.classList.add('hidden'), ms);
+  }
+
+  /**
+   * 설명을 띄우고 화면 탭을 기다림 — 탭하면 설명이 사라지면서 onTap()(= 다음 단계)이 실행돼요.
+   * 자동으로 닫히지 않으므로 플레이어가 끝까지 읽고 넘어갈 수 있습니다.
+   */
+  eduToastGate(title, body, onTap) {
+    this._fillEdu(title, body);
+    this.$edu.classList.add('gated');
+    clearTimeout(this.eduTimer);      // 자동 닫힘 없음 — 탭이 유일한 진행 수단
+    this.eduGateFn = onTap;
+    this.$eduGate.classList.remove('hidden');
+  }
+
+  /** 대기 중이던 다음 단계를 실행하고 설명을 닫음 (대기 중이 아니면 아무 일도 안 함) */
+  releaseEduGate() {
+    const next = this.eduGateFn;
+    if (!next) return;
+    this.eduGateFn = null;
+    this.$eduGate.classList.add('hidden');
+    this.$edu.classList.add('hidden');
+    this.$edu.classList.remove('gated');
+    next();
+  }
+
+  _fillEdu(title, body) {
     this.$edu.querySelector('.edu-title').textContent = title;
     this.$edu.querySelector('.edu-body').innerHTML = body;
     this.$edu.classList.remove('hidden');
-    clearTimeout(this.eduTimer);
-    this.eduTimer = setTimeout(() => this.$edu.classList.add('hidden'), ms);
   }
 
   trayHint(text) { this.$trayHint.textContent = text; }

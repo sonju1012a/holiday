@@ -66,7 +66,10 @@
   <aside id="edu-toast" class="hidden">
     <div class="edu-title"></div>
     <div class="edu-body"></div>
+    <div class="edu-tap">화면을 탭하면 다음으로 넘어가요 &#9654;</div>
   </aside>
+  <!-- 설명을 읽는 동안 다음 단계를 붙잡아 두는 투명 레이어 — 아무 데나 탭하면 진행 -->
+  <div id="edu-gate" class="hidden"></div>
 
   <!-- 토스쇼핑 추천 토스트 -->
   <aside id="shop-toast" class="hidden">
@@ -122,11 +125,14 @@
           <b>간편 제사상</b>
           <small>배달·냉동식품 자유 배치 · 금기 음식만 피하기</small>
         </button>
+        <!-- TODO: 세손(35세) 확인 후 다시 노출. 모드 로직(MODES.myfamily)은 그대로 살아 있음 -->
+        <!--
         <button class="mode-btn" data-mode="myfamily">
           <span class="m-emoji">📿</span>
           <b>일직 손가 35세손 차례상</b>
-          <small>우리 집 차례상 그대로 · 처사(處士) · 4대 8위</small>
+          <small>우리 집 차례상 그대로 · 처사(處士) · 3대 6위</small>
         </button>
+        -->
       </div>
       <button id="btn-shoplist-intro" class="btn-secondary shoplist-open" data-open-shoplist>🛒 차례상 구매 리스트 보기</button>
       <a id="request-charye" class="request-link"
